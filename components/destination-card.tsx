@@ -34,7 +34,7 @@ export function DestinationCard({ destination }: DestinationCardProps) {
           />
         </div>
         <CardContent className="p-5">
-          <h3 className="text-sm text-gray-800 mb-3">{destination.city}</h3>
+          <h3 className="text-sm text-gray-800 mb-3">{destination.title}</h3>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Plane size={16} className="text-brand-primary" />
             <span className="font-medium">{destination.tripDuration} Days Trip</span>

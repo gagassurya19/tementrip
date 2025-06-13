@@ -47,7 +47,27 @@ export default function ExplorePage() {
                   lng: dest.location.lng,
                   title: dest.title,
                   placeId: dest.placeId,
+                  imageUrl: dest.imageUrl,
+                  description: dest.description,
+                  totalScore: dest.totalScore,
+                  reviewsCount: dest.reviewsCount,
                 }))}
+                selectedLocation={selectedDestination ? {
+                  lat: selectedDestination.location.lat,
+                  lng: selectedDestination.location.lng,
+                  title: selectedDestination.title,
+                  placeId: selectedDestination.placeId,
+                  imageUrl: selectedDestination.imageUrl,
+                  description: selectedDestination.description,
+                  totalScore: selectedDestination.totalScore,
+                  reviewsCount: selectedDestination.reviewsCount,
+                } : null}
+                onLocationSelect={(location) => {
+                  const dest = filteredDestinations.find(d => d.placeId === location.placeId)
+                  if (dest) {
+                    setSelectedDestination(dest)
+                  }
+                }}
                 zoom={5}
               />
             </div>
