@@ -1,0 +1,97 @@
+"use client"
+
+import { useState } from "react"
+import { Navbar } from "@/components/navbar"
+import { LeafletMap } from "@/components/leaflet-map"
+import { destinations } from "@/lib/data"
+import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search } from "lucide-react"
+import Link from "next/link"
+
+export default function ExplorePage() {
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedDestination, setSelectedDestination] = useState<any | null>(null)
+
+  const filteredDestinations = searchTerm
+    ? destinations.filter(
+        (dest) =>
+          dest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dest.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dest.state.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : destinations
+
+  return (
+    <main className="min-h-screen flex flex-col">
+      <Navbar />
+
+      <div className="container py-8">
+        <h1 className="text-3xl font-bold mb-4">Explore Destinations</h1>
+
+        <div className="flex mb-6">
+          <Input
+            type="text"
+            placeholder="Search destinations"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="max-w-md mr-2"
+          />
+          <Button size="icon">
+            <Search className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="h-[600px] rounded-lg overflow-hidden border">
+              <LeafletMap
+                locations={filteredDestinations.map((dest) => ({
+                  lat: dest.location.lat,
+                  lng: dest.location.lng,
+                  title: dest.title,
+                  placeId: dest.placeId,
+                }))}
+                zoom={5}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Destinations</h2>
+            <div className="space-y-3 max-h-[550px] overflow-y-auto pr-2">
+              {filteredDestinations.map((dest) => (
+                <Card
+                  key={dest.placeId}
+                  className={`cursor-pointer transition-all ${selectedDestination?.placeId === dest.placeId ? "ring-2 ring-blue-500" : ""}`}
+                  onClick={() => setSelectedDestination(dest)}
+                >
+                  <CardContent className="p-4">
+                    <h3 className="font-medium">{dest.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {dest.city}, {dest.state}
+                    </p>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium">{dest.totalScore}</span>
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({dest.reviewsCount.toLocaleString()} reviews)
+                        </span>
+                      </div>
+                      <Link href={`/destinations/${dest.placeId}`}>
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
