@@ -5,7 +5,10 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/contexts/user-context"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ 
+  subsets: ["latin"],
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   title: "TemanTrip - Smart Travel Recommendations",
@@ -20,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <UserProvider>{children}</UserProvider>
         </ThemeProvider>

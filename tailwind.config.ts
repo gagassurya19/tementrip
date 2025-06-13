@@ -17,6 +17,9 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+      },
       colors: {
         // TemanTrip Brand Colors
         brand: {

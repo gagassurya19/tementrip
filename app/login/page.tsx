@@ -47,8 +47,8 @@ export default function Login() {
       <div className="min-h-[calc(100vh-4rem)] flex flex-col md:flex-row container mx-auto px-4 md:px-0 overflow-x-hidden">
         <div className="w-full md:w-1/2 bg-brand-secondary mx-0 my-4 md:mx-24 md:my-24 rounded-3xl flex flex-col justify-center">
           <div className="p-4 md:p-8">
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">Welcome to</h1>
-            <h2 className="text-3xl md:text-4xl font-bold text-brand-primary mb-4 md:mb-6">TemanTrip</h2>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome to</h1>
+            <h2 className="text-4xl md:text-5xl font-bold text-brand-primary mb-4 md:mb-6">TemanTrip</h2>
             <p className="text-gray-700 mb-6 md:mb-8 text-sm md:text-base">
               Plan your trip based on your preferences with a smart recommendation system. Discover the best
               destinations quickly, easily, and personally.

@@ -22,7 +22,7 @@ export function Navbar() {
   return (
     <header className="border-b bg-white sticky top-0 z-50">
       <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-blue-400">
+        <Link href="/" className="text-2xl font-bold text-brand-primary">
           TemanTrip
         </Link>
 
@@ -112,7 +112,7 @@ export function Navbar() {
             <>
               <div className="hidden md:block">
                 <Link href="/login">
-                  <Button variant="secondary" className="bg-blue-400 text-white hover:bg-blue-500">
+                  <Button variant="secondary" className="bg-brand-primary hover:bg-brand-primaryHover text-white">
                     Sign in
                   </Button>
                 </Link>
@@ -204,14 +204,14 @@ export function Navbar() {
               <div className="space-y-2 border-t pt-2">
                 <Link
                   href="/login"
-                  className="block px-2 py-1 hover:bg-gray-100 rounded"
+                  className="block px-2 py-1 text-white bg-brand-primary hover:bg-brand-primaryHover rounded"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/register"
-                  className="block px-2 py-1 hover:bg-gray-100 rounded"
+                  className="block px-2 py-1 text-white bg-brand-primary hover:bg-brand-primaryHover rounded"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Register
