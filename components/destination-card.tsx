@@ -21,23 +21,23 @@ export function DestinationCard({ destination }: DestinationCardProps) {
 
   return (
     <Link href={`/destinations/${destination.placeId}`}>
-      <Card className="overflow-hidden transition-all hover:shadow-lg">
-        <div className="relative h-48 w-full">
+      <Card className="overflow-hidden transition-all hover:shadow-xl hover:scale-[1.02] bg-white rounded-2xl shadow-md border-0">
+        <div className="relative h-80 w-full">
           <Image
             src={imageSrc || "/placeholder.svg"}
             alt={destination.title}
             fill
-            className="object-cover"
+            className="object-cover rounded-t-2xl"
             onError={() => setImageError(true)}
             priority={false}
             loading="lazy"
           />
         </div>
-        <CardContent className="p-4">
-          <h3 className="font-semibold text-lg">{destination.city}</h3>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-            <Plane size={16} />
-            <span>{destination.tripDuration} Days Trip</span>
+        <CardContent className="p-5">
+          <h3 className="text-sm text-gray-800 mb-3">{destination.city}</h3>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Plane size={16} className="text-brand-primary" />
+            <span className="font-medium">{destination.tripDuration} Days Trip</span>
           </div>
         </CardContent>
       </Card>

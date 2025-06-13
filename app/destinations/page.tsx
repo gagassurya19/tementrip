@@ -41,9 +41,9 @@ export default function DestinationsPage() {
         <h1 className="text-3xl font-bold mb-6">Explore Destinations</h1>
 
         <div className="flex max-w-md mb-8">
-          <Input type="text" placeholder="Search destinations" className="mr-2" />
-          <Button size="icon">
-            <Search className="h-5 w-5" />
+          <Input type="text" placeholder="search for a destination" className="pr-12 rounded-r-none rounded-l-2xl h-14 text-lg bg-[#F6F6F6] border-0" />
+          <Button size="icon" className="h-14 w-14 rounded-l-none rounded-r-2xl bg-brand-primary hover:bg-brand-primaryHover">
+            <Search className="h-8 w-8" />
           </Button>
         </div>
 
