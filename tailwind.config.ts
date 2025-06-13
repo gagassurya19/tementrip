@@ -18,6 +18,15 @@ const config: Config = {
     },
     extend: {
       colors: {
+        // TemanTrip Brand Colors
+        brand: {
+          primary: "#95B1EE",     // Main brand color - primary blue
+          primaryHover: "#7495DE", // Hover state for primary
+          secondary: "#D5E0F8",   // Light background blue
+          accent: "#6B8DD6",      // Darker accent blue
+          light: "#E8F0FE",       // Very light blue for backgrounds
+          background: "#F4F7FD",  // Default page background
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
