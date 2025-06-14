@@ -16,12 +16,12 @@ import { usePathname } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 
 export function Navbar() {
-  const { user, isAuthenticated, logout, bookmarks } = useUser()
+  const { user, isAuthenticated, logout, bookmarks, bookings } = useUser()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
 
   const bookmarkCount = bookmarks?.length || 0
-
+  const bookingCount = bookings?.length || 0
   return (
     <header className="border-b bg-white sticky top-0 z-50 shadow-sm">
       <div className="container flex h-16 items-center justify-between">
@@ -63,6 +63,17 @@ export function Navbar() {
           {isAuthenticated ? (
             <>
               <div className="hidden md:flex items-center gap-3">
+                <Link href="/bookings">
+                  <Button variant="ghost" size="sm" className="relative flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span className="hidden lg:inline">Booking</span>
+                    {bookingCount > 0 && (
+                      <Badge variant="default" className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-1 text-xs">
+                        {bookingCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </Link>
                 <Link href="/bookmarks">
                   <Button variant="ghost" size="sm" className="relative flex items-center gap-2">
                     <Bookmark className="h-4 w-4" />
@@ -104,7 +115,7 @@ export function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/bookings" className="flex items-center">
                         <Calendar className="mr-2 h-4 w-4" />
-                        Booking Saya
+                        Booking Saya ({bookingCount})
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -227,6 +238,11 @@ export function Navbar() {
                 >
                   <Calendar className="h-4 w-4" />
                   Booking Saya
+                  {bookingCount > 0 && (
+                    <Badge variant="secondary" className="ml-auto">
+                      {bookingCount}
+                    </Badge>
+                  )}
                 </Link>
                 <button
                   className="w-full flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"

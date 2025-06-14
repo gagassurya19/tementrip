@@ -47,19 +47,14 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 export default function DestinationDetail({ params }: { params: { id: string } }) {
   const destination = destinations.find((d) => d.placeId === params.id)
-  const { isAuthenticated, bookmarks, addBookmark, removeBookmark } = useUser()
+  const { isAuthenticated, bookmarks, addBookmark, removeBookmark, isBookmarked: checkIsBookmarked, getBookmarkByPlaceId } = useUser()
   const router = useRouter()
 
-  const [isBookmarked, setIsBookmarked] = useState(false)
   const [imageError, setImageError] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
   const [showNearbyPlaces, setShowNearbyPlaces] = useState(false)
 
-  useEffect(() => {
-    if (isAuthenticated && bookmarks) {
-      setIsBookmarked(bookmarks.some((b) => b.placeId === params.id))
-    }
-  }, [isAuthenticated, bookmarks, params.id])
+  const isBookmarked = isAuthenticated ? checkIsBookmarked(params.id) : false
 
   if (!destination) {
     notFound()
@@ -151,7 +146,7 @@ export default function DestinationDetail({ params }: { params: { id: string } }
     }
 
     if (isBookmarked) {
-      const bookmark = bookmarks.find((b) => b.placeId === params.id)
+      const bookmark = getBookmarkByPlaceId(params.id)
       if (bookmark) {
         removeBookmark(bookmark.id)
       }

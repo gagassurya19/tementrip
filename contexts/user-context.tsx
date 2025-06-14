@@ -2,6 +2,46 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 
+// localStorage utility functions
+const STORAGE_KEYS = {
+  user: "teman-trip-user",
+  bookmarks: "teman-trip-bookmarks", 
+  bookings: "teman-trip-bookings"
+} as const
+
+const storageUtils = {
+  set: (key: string, value: any) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (error) {
+      console.error(`Error saving ${key} to localStorage:`, error)
+    }
+  },
+  get: (key: string) => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : null
+    } catch (error) {
+      console.error(`Error reading ${key} from localStorage:`, error)
+      return null
+    }
+  },
+  remove: (key: string) => {
+    try {
+      localStorage.removeItem(key)
+    } catch (error) {
+      console.error(`Error removing ${key} from localStorage:`, error)
+    }
+  },
+  clear: () => {
+    try {
+      Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key))
+    } catch (error) {
+      console.error("Error clearing localStorage:", error)
+    }
+  }
+}
+
 export interface UserProfile {
   id: string
   name: string
@@ -48,8 +88,13 @@ interface UserContextType {
   updateProfile: (profile: Partial<UserProfile>) => void
   addBookmark: (destination: any) => void
   removeBookmark: (bookmarkId: string) => void
+  clearAllBookmarks: () => void
+  isBookmarked: (placeId: string) => boolean
+  getBookmarkByPlaceId: (placeId: string) => Bookmark | undefined
   addBooking: (booking: Omit<Booking, "id" | "bookingDate">) => void
   cancelBooking: (bookingId: string) => void
+  clearAllBookings: () => void
+  getBookingById: (bookingId: string) => Booking | undefined
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -59,44 +104,62 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Check if user is logged in on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
-    const storedBookmarks = localStorage.getItem("bookmarks")
-    const storedBookings = localStorage.getItem("bookings")
+    const loadFromStorage = () => {
+      try {
+        const storedUser = storageUtils.get(STORAGE_KEYS.user)
+        const storedBookmarks = storageUtils.get(STORAGE_KEYS.bookmarks)
+        const storedBookings = storageUtils.get(STORAGE_KEYS.bookings)
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
+        if (storedUser) {
+          setUser(storedUser)
+        }
+
+        if (storedBookmarks && Array.isArray(storedBookmarks)) {
+          setBookmarks(storedBookmarks)
+        }
+
+        if (storedBookings && Array.isArray(storedBookings)) {
+          setBookings(storedBookings)
+        }
+      } catch (error) {
+        console.error("Error loading data from localStorage:", error)
+        // Clear potentially corrupted data
+        storageUtils.clear()
+      } finally {
+        setIsLoading(false)
+        setIsInitialized(true)
+      }
     }
 
-    if (storedBookmarks) {
-      setBookmarks(JSON.parse(storedBookmarks))
-    }
-
-    if (storedBookings) {
-      setBookings(JSON.parse(storedBookings))
-    }
-
-    setIsLoading(false)
+    loadFromStorage()
   }, [])
 
-  // Save user, bookmarks, and bookings to localStorage when they change
+  // Save user to localStorage when it changes
   useEffect(() => {
+    if (!isInitialized) return
+
     if (user) {
-      localStorage.setItem("user", JSON.stringify(user))
+      storageUtils.set(STORAGE_KEYS.user, user)
     } else {
-      localStorage.removeItem("user")
+      storageUtils.remove(STORAGE_KEYS.user)
     }
-  }, [user])
+  }, [user, isInitialized])
 
+  // Save bookmarks to localStorage when they change
   useEffect(() => {
-    localStorage.setItem("bookmarks", JSON.stringify(bookmarks))
-  }, [bookmarks])
+    if (!isInitialized) return
+    storageUtils.set(STORAGE_KEYS.bookmarks, bookmarks)
+  }, [bookmarks, isInitialized])
 
+  // Save bookings to localStorage when they change
   useEffect(() => {
-    localStorage.setItem("bookings", JSON.stringify(bookings))
-  }, [bookings])
+    if (!isInitialized) return
+    storageUtils.set(STORAGE_KEYS.bookings, bookings)
+  }, [bookings, isInitialized])
 
   const login = async (email: string, password: string) => {
     // In a real app, this would call an API
@@ -158,11 +221,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }
 
   const addBookmark = (destination: any) => {
+    // Check if bookmark already exists
+    const existingBookmark = bookmarks.find(bookmark => bookmark.placeId === destination.placeId)
+    if (existingBookmark) {
+      console.warn("Bookmark already exists for this destination")
+      return
+    }
+
     const newBookmark: Bookmark = {
       id: `bookmark-${Date.now()}`,
       placeId: destination.placeId,
       title: destination.title,
-      imageUrl: destination.imageUrl,
+      imageUrl: destination.imageUrl || "",
       city: destination.city,
       state: destination.state,
       dateAdded: new Date().toISOString(),
@@ -173,6 +243,18 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const removeBookmark = (bookmarkId: string) => {
     setBookmarks((prev) => prev.filter((bookmark) => bookmark.id !== bookmarkId))
+  }
+
+  const clearAllBookmarks = () => {
+    setBookmarks([])
+  }
+
+  const isBookmarked = (placeId: string) => {
+    return bookmarks.some(bookmark => bookmark.placeId === placeId)
+  }
+
+  const getBookmarkByPlaceId = (placeId: string) => {
+    return bookmarks.find(bookmark => bookmark.placeId === placeId)
   }
 
   const addBooking = (bookingData: Omit<Booking, "id" | "bookingDate">) => {
@@ -191,6 +273,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  const clearAllBookings = () => {
+    setBookings([])
+  }
+
+  const getBookingById = (bookingId: string) => {
+    return bookings.find(booking => booking.id === bookingId)
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -205,8 +295,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
         updateProfile,
         addBookmark,
         removeBookmark,
+        clearAllBookmarks,
+        isBookmarked,
+        getBookmarkByPlaceId,
         addBooking,
         cancelBooking,
+        clearAllBookings,
+        getBookingById,
       }}
     >
       {children}

@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export default function BookmarksPage() {
-  const { user, isAuthenticated, bookmarks, removeBookmark, isLoading } = useUser()
+  const { user, isAuthenticated, bookmarks, removeBookmark, clearAllBookmarks, isLoading } = useUser()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("dateAdded")
@@ -119,6 +119,19 @@ export default function BookmarksPage() {
               <Button size="sm" onClick={() => router.push("/itinerary")}>
                 <Calendar className="h-4 w-4 mr-2" />
                 Buat Itinerary
+              </Button>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => {
+                  if (window.confirm("Apakah Anda yakin ingin menghapus semua bookmark?")) {
+                    clearAllBookmarks()
+                  }
+                }}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <BookmarkX className="h-4 w-4 mr-2" />
+                Hapus Semua
               </Button>
             </div>
           )}
