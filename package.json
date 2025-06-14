@@ -1,6 +1,14 @@
 {
-  "name": "my-v0-project",
+  "name": "travel-planner-tementrip",
   "version": "0.1.0",
+  "description": "Travel Planner for Tementrip",
+  "author": "Gagassurya19",
+  "license": "MIT",
+  "homepage": "https://tementrip.gagas.me",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gagassurya19/tementrip"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
