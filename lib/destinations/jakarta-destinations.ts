@@ -2,7 +2,7 @@ import type { Destination } from "../types"
 
 export const jakartaDestinations: Destination[] = [
   {
-    "imageUrl": "/images/destinations/ChIJYaJ20FDtaS4RDNry7LknMQc.jpg",
+    "imageUrl": "/images/destination/ChIJYaJ20FDtaS4RDNry7LknMQc.jpg",
     "title": "Taman Mini Indonesia Indah",
     "totalScore": 4.6,
     "reviewsCount": 164271,
@@ -19,7 +19,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJLbFk59L1aS4RyLzp4OHWKj0.jpg",
+    "imageUrl": "/images/destination/ChIJLbFk59L1aS4RyLzp4OHWKj0.jpg",
     "title": "Monumen Nasional",
     "totalScore": 4.6,
     "reviewsCount": 114792,
@@ -36,7 +36,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJcdfvd3T0aS4RWFPBwpxqIIU.jpg",
+    "imageUrl": "/images/destination/ChIJcdfvd3T0aS4RWFPBwpxqIIU.jpg",
     "title": "Taman Impian Jaya Ancol",
     "totalScore": 4.5,
     "reviewsCount": 44219,
@@ -53,7 +53,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJG1ytuCIeai4RELSMP0wM6o4.jpg",
+    "imageUrl": "/images/destination/ChIJG1ytuCIeai4RELSMP0wM6o4.jpg",
     "title": "Sea World Indonesia",
     "totalScore": 4.5,
     "reviewsCount": 43983,
@@ -70,7 +70,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ7V-PP_8dai4RMqvOj2luU_I.jpg",
+    "imageUrl": "/images/destination/ChIJ7V-PP_8dai4RMqvOj2luU_I.jpg",
     "title": "Taman Fatahillah",
     "totalScore": 4.6,
     "reviewsCount": 27140,
@@ -87,7 +87,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJA88y_8v1aS4RbfwYWObt98A.jpg",
+    "imageUrl": "/images/destination/ChIJA88y_8v1aS4RbfwYWObt98A.jpg",
     "title": "Taman Lapangan Banteng",
     "totalScore": 4.7,
     "reviewsCount": 26724,
@@ -104,7 +104,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ1Ugkkm3zaS4RXLLyfr1tc4M.jpg",
+    "imageUrl": "/images/destination/ChIJ1Ugkkm3zaS4RXLLyfr1tc4M.jpg",
     "title": "Tebet Eco Park",
     "totalScore": 4.7,
     "reviewsCount": 24677,
@@ -121,7 +121,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJfaWSQv8dai4RRQeMZy0D8BI.jpg",
+    "imageUrl": "/images/destination/ChIJfaWSQv8dai4RRQeMZy0D8BI.jpg",
     "title": "Museum Sejarah Jakarta",
     "totalScore": 4.6,
     "reviewsCount": 22550,
@@ -138,7 +138,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ7RcAlCrsaS4RM4GToNQSzt8.png",
+    "imageUrl": "/images/destination/ChIJ7RcAlCrsaS4RM4GToNQSzt8.png",
     "title": "Kawasan Wisata Kota Tua Jakarta",
     "totalScore": 4.6,
     "reviewsCount": 22257,
@@ -155,7 +155,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ-S4F5Bb0aS4RgVq6v81ZM4s.jpg",
+    "imageUrl": "/images/destination/ChIJ-S4F5Bb0aS4RgVq6v81ZM4s.jpg",
     "title": "Taman Suropati",
     "totalScore": 4.6,
     "reviewsCount": 21392,
@@ -172,7 +172,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJKeQOsCL0aS4RLuH7DlpcjaI.jpg",
+    "imageUrl": "/images/destination/ChIJKeQOsCL0aS4RLuH7DlpcjaI.jpg",
     "title": "Taman Menteng",
     "totalScore": 4.5,
     "reviewsCount": 20505,
@@ -189,7 +189,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJoytQiSUdai4RkGKxmmKQnMM.jpg",
+    "imageUrl": "/images/destination/ChIJoytQiSUdai4RkGKxmmKQnMM.jpg",
     "title": "Taman Wisata Alam Mangrove Angke Kapuk",
     "totalScore": 4.3,
     "reviewsCount": 15942,
@@ -206,7 +206,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJHeC1aM71aS4RbAyE1ULw-so.jpg",
+    "imageUrl": "/images/destination/ChIJHeC1aM71aS4RbAyE1ULw-so.jpg",
     "title": "Masjid Istiqlal",
     "totalScore": 4.8,
     "reviewsCount": 14200,
@@ -223,7 +223,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJrSFu-M71aS4RefySRqf97AM.jpg",
+    "imageUrl": "/images/destination/ChIJrSFu-M71aS4RefySRqf97AM.jpg",
     "title": "Katedral Jakarta, Santa Maria Diangkat ke Surga",
     "totalScore": 4.8,
     "reviewsCount": 12789,
@@ -240,7 +240,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJL2LONqYdai4R8R8LHoOjct8.jpg",
+    "imageUrl": "/images/destination/ChIJL2LONqYdai4R8R8LHoOjct8.jpg",
     "title": "Pantjoran Pantai Indah Kapuk",
     "totalScore": 4.7,
     "reviewsCount": 12265,
@@ -257,7 +257,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJo7n7ffv3aS4RsSNgsHX4e94.jpg",
+    "imageUrl": "/images/destination/ChIJo7n7ffv3aS4RsSNgsHX4e94.jpg",
     "title": "Jakarta AQuarium Safari",
     "totalScore": 4.7,
     "reviewsCount": 10666,
@@ -274,7 +274,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJuTW9y2zxaS4RKwSl9KopVgI.jpg",
+    "imageUrl": "/images/destination/ChIJuTW9y2zxaS4RKwSl9KopVgI.jpg",
     "title": "Taman Ayodia - Barito",
     "totalScore": 4.5,
     "reviewsCount": 10648,
@@ -291,7 +291,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJDzlr6wH2aS4Ro2gBJGt31G0.jpg",
+    "imageUrl": "/images/destination/ChIJDzlr6wH2aS4Ro2gBJGt31G0.jpg",
     "title": "Museum Bank Indonesia",
     "totalScore": 4.7,
     "reviewsCount": 10637,
@@ -308,7 +308,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ7Zj-D1HxaS4RTEzBshMYqsk.jpg",
+    "imageUrl": "/images/destination/ChIJ7Zj-D1HxaS4RTEzBshMYqsk.jpg",
     "title": "KidZania Jakarta",
     "totalScore": 4.6,
     "reviewsCount": 10519,
@@ -325,7 +325,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJSb_tryQeai4Razpg-FOwECI.jpg",
+    "imageUrl": "/images/destination/ChIJSb_tryQeai4Razpg-FOwECI.jpg",
     "title": "Atlantis Water Adventures Ancol",
     "totalScore": 4.5,
     "reviewsCount": 10429,
@@ -342,7 +342,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJF29IST0eai4RZvM5-mnWcJY.jpg",
+    "imageUrl": "/images/destination/ChIJF29IST0eai4RZvM5-mnWcJY.jpg",
     "title": "Ocean Dream Samudra - Ancol",
     "totalScore": 4.6,
     "reviewsCount": 9672,
@@ -359,7 +359,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJpzb_bMAdai4ReeRnqMgSSMk.jpg",
+    "imageUrl": "/images/destination/ChIJpzb_bMAdai4ReeRnqMgSSMk.jpg",
     "title": "Taman Waduk Pluit",
     "totalScore": 4.4,
     "reviewsCount": 9239,
@@ -376,7 +376,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJB1Svq5_2aS4RmQyBLA0cPSQ.jpg",
+    "imageUrl": "/images/destination/ChIJB1Svq5_2aS4RmQyBLA0cPSQ.jpg",
     "title": "Monumen Selamat Datang",
     "totalScore": 4.7,
     "reviewsCount": 8587,
@@ -393,7 +393,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJnToeJBoeai4RGjp1dqwxz54.jpg",
+    "imageUrl": "/images/destination/ChIJnToeJBoeai4RGjp1dqwxz54.jpg",
     "title": "Allianz Eco Park",
     "totalScore": 4.6,
     "reviewsCount": 6677,
@@ -410,7 +410,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJdXBB9n4QFAURQs2buyfwl98.jpg",
+    "imageUrl": "/images/destination/ChIJdXBB9n4QFAURQs2buyfwl98.jpg",
     "title": "Taman Situ Lembang",
     "totalScore": 4.6,
     "reviewsCount": 6456,
@@ -427,7 +427,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJV13T9zYeai4RlhpJBj3BhXE.jpg",
+    "imageUrl": "/images/destination/ChIJV13T9zYeai4RlhpJBj3BhXE.jpg",
     "title": "Taman Impian Jaya Ancol",
     "totalScore": 4.6,
     "reviewsCount": 5468,
@@ -444,7 +444,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJV8QyMBPxaS4Ro39SBRBCZ6k.jpg",
+    "imageUrl": "/images/destination/ChIJV8QyMBPxaS4Ro39SBRBCZ6k.jpg",
     "title": "Taman Langsat",
     "totalScore": 4.5,
     "reviewsCount": 5238,
@@ -461,7 +461,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJtXURO2wdai4Rn7vSSu5Fma4.jpg",
+    "imageUrl": "/images/destination/ChIJtXURO2wdai4Rn7vSSu5Fma4.jpg",
     "title": "Kawasan Ekowisata Mangrove PIK",
     "totalScore": 4.3,
     "reviewsCount": 4491,
@@ -478,7 +478,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ41ttCQ70aS4R3eRig1FOARA.jpg",
+    "imageUrl": "/images/destination/ChIJ41ttCQ70aS4R3eRig1FOARA.jpg",
     "title": "Taman Tangkuban Perahu",
     "totalScore": 4.5,
     "reviewsCount": 4376,
@@ -495,7 +495,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJPcS3V4gdai4RFRiCKMVUaTQ.jpg",
+    "imageUrl": "/images/destination/ChIJPcS3V4gdai4RFRiCKMVUaTQ.jpg",
     "title": "Taman Hutan Kota Penjaringan",
     "totalScore": 4.5,
     "reviewsCount": 3830,
@@ -512,7 +512,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJOVWsoBkeai4RlI5DwRYmYVo.jpg",
+    "imageUrl": "/images/destination/ChIJOVWsoBkeai4RlI5DwRYmYVo.jpg",
     "title": "Faunaland Ancol",
     "totalScore": 4.5,
     "reviewsCount": 3724,
@@ -529,7 +529,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJC5w3F_kdai4RGJG1N7OAs0E.jpg",
+    "imageUrl": "/images/destination/ChIJC5w3F_kdai4RGJG1N7OAs0E.jpg",
     "title": "Toko Merah",
     "totalScore": 4.6,
     "reviewsCount": 3352,
@@ -546,7 +546,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJwaKHt0bxaS4Rdz5scpPNTtA.jpg",
+    "imageUrl": "/images/destination/ChIJwaKHt0bxaS4Rdz5scpPNTtA.jpg",
     "title": "Taman Mataram Jakarta",
     "totalScore": 4.6,
     "reviewsCount": 3335,
@@ -563,7 +563,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJXVigIpv2aS4REJto8lZlJ9w.jpg",
+    "imageUrl": "/images/destination/ChIJXVigIpv2aS4REJto8lZlJ9w.jpg",
     "title": "Museum Tekstil Jakarta",
     "totalScore": 4.5,
     "reviewsCount": 2940,
@@ -580,7 +580,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJf8IvSSD0aS4RGoaqXgFCQ4I.jpg",
+    "imageUrl": "/images/destination/ChIJf8IvSSD0aS4RGoaqXgFCQ4I.jpg",
     "title": "Galeri Indonesia Kaya",
     "totalScore": 4.8,
     "reviewsCount": 1725,
@@ -597,7 +597,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJi6GzR3sdai4R-OPvvHGstL0.jpg",
+    "imageUrl": "/images/destination/ChIJi6GzR3sdai4R-OPvvHGstL0.jpg",
     "title": "Urban Farm PIK",
     "totalScore": 4.7,
     "reviewsCount": 1711,
@@ -614,7 +614,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJtQCUlDYeai4RBl7pBSY0M74.jpg",
+    "imageUrl": "/images/destination/ChIJtQCUlDYeai4RBl7pBSY0M74.jpg",
     "title": "Alive Museum Ancol",
     "totalScore": 4.3,
     "reviewsCount": 1179,
@@ -631,7 +631,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJOZxSSj3xaS4RjYBuPBQAe0g.jpg",
+    "imageUrl": "/images/destination/ChIJOZxSSj3xaS4RjYBuPBQAe0g.jpg",
     "title": "Kampoeng Gallery",
     "totalScore": 4.6,
     "reviewsCount": 1125,
@@ -648,7 +648,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJ92Qwk_fzaS4RVZnAAOyPw2U.jpg",
+    "imageUrl": "/images/destination/ChIJ92Qwk_fzaS4RVZnAAOyPw2U.jpg",
     "title": "Starbucks Setiabudi One",
     "totalScore": 4.5,
     "reviewsCount": 973,
@@ -665,7 +665,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 0
   },
   {
-    "imageUrl": "/images/destinations/ChIJ3_yZ8YDxaS4Rm0_kwajzumA.jpg",
+    "imageUrl": "/images/destination/ChIJ3_yZ8YDxaS4Rm0_kwajzumA.jpg",
     "title": "The Playground",
     "totalScore": 4.5,
     "reviewsCount": 936,
@@ -682,7 +682,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJgR1YbpkLai4RHODC5HAJyOA.jpg",
+    "imageUrl": "/images/destination/ChIJgR1YbpkLai4RHODC5HAJyOA.jpg",
     "title": "Wisata pantai. Pulau pari",
     "totalScore": 4.6,
     "reviewsCount": 862,
@@ -699,7 +699,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJJwPdECILai4RbBeZQ3Q7K6M.jpg",
+    "imageUrl": "/images/destination/ChIJJwPdECILai4RbBeZQ3Q7K6M.jpg",
     "title": "Pantai Pasir Perawan",
     "totalScore": 4.8,
     "reviewsCount": 717,
@@ -716,7 +716,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJVWec4Qodai4RndtaPzBOjVw.jpg",
+    "imageUrl": "/images/destination/ChIJVWec4Qodai4RndtaPzBOjVw.jpg",
     "title": "Suaka Margasatwa Muara Angke",
     "totalScore": 4.3,
     "reviewsCount": 663,
@@ -733,7 +733,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJV76SdxB0ai4R6i8m2WMA3BA.jpg",
+    "imageUrl": "/images/destination/ChIJV76SdxB0ai4R6i8m2WMA3BA.jpg",
     "title": "Taman Nasional Kepulauan Seribu",
     "totalScore": 4.6,
     "reviewsCount": 555,
@@ -750,7 +750,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJMb5RbozzaS4Rxg8NzMZ0f9c.jpg",
+    "imageUrl": "/images/destination/ChIJMb5RbozzaS4Rxg8NzMZ0f9c.jpg",
     "title": "Masjid Agung Al-Munada Darussalam Baiturrahman (Masjid Perahu)",
     "totalScore": 4.7,
     "reviewsCount": 511,
@@ -767,7 +767,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJbQox7JsLai4RCqCG70z2QmQ.jpg",
+    "imageUrl": "/images/destination/ChIJbQox7JsLai4RCqCG70z2QmQ.jpg",
     "title": "Wisata pulau",
     "totalScore": 4.6,
     "reviewsCount": 441,
@@ -784,7 +784,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJdY2ZvwXxaS4RcfpdHoPJf3k.jpg",
+    "imageUrl": "/images/destination/ChIJdY2ZvwXxaS4RcfpdHoPJf3k.jpg",
     "title": "Imagispace",
     "totalScore": 4.4,
     "reviewsCount": 83,
@@ -801,7 +801,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJS01JJhr0aS4Rknsc_1OUjwg.jpg",
+    "imageUrl": "/images/destination/ChIJS01JJhr0aS4Rknsc_1OUjwg.jpg",
     "title": "Taman Sumenep",
     "totalScore": 4.6,
     "reviewsCount": 70,
@@ -818,7 +818,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJMZYnRCD0aS4RAJ1J8BBNI9I.jpg",
+    "imageUrl": "/images/destination/ChIJMZYnRCD0aS4RAJ1J8BBNI9I.jpg",
     "title": "Dancing Fountain Show Grand Indonesia",
     "totalScore": 4.1,
     "reviewsCount": 40,
@@ -835,7 +835,7 @@ export const jakartaDestinations: Destination[] = [
     "tripDuration": 1
   },
   {
-    "imageUrl": "/images/destinations/ChIJcYZGZRceai4RLG5Org0ZIfM.jpg",
+    "imageUrl": "/images/destination/ChIJcYZGZRceai4RLG5Org0ZIfM.jpg",
     "title": "Ancol Learning Farm (Bertani)",
     "totalScore": 4.6,
     "reviewsCount": 39,
