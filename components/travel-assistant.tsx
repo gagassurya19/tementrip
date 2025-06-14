@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -422,13 +422,23 @@ export function TravelAssistant() {
   // Itinerary generation state
   const [destination, setDestination] = useState("")
   const [days, setDays] = useState("3")
-  const [selectedInterests, setSelectedInterests] = useState<string[]>(user?.preferences?.interests || [])
-  const [budget, setBudget] = useState(user?.preferences?.budget || "medium")
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([])
+  const [budget, setBudget] = useState("medium")
   const [itinerary, setItinerary] = useState("")
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Destination info state
   const [infoDestination, setInfoDestination] = useState("")
   const [destinationInfo, setDestinationInfo] = useState("")
+
+  // Initialize form with user preferences only once
+  useEffect(() => {
+    if (user && !isInitialized) {
+      setSelectedInterests(user.preferences?.interests || [])
+      setBudget(user.preferences?.budget || "medium")
+      setIsInitialized(true)
+    }
+  }, [user, isInitialized])
 
   const handleQuestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

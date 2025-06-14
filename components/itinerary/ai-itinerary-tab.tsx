@@ -1,32 +1,51 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bot, Loader2, Save } from "lucide-react"
+import { Bot, Loader2, Save, BookmarkCheck, X } from "lucide-react"
 import { useUser } from "@/contexts/user-context"
 import { interestOptions } from "@/lib/constants/interests"
 import type { SavedItinerary } from "@/types/itinerary"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
+import Image from "next/image"
 
 interface AIItineraryTabProps {
   onSaveItinerary: (itinerary: SavedItinerary) => void
 }
 
 export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps) {
-  const { user } = useUser()
+  const { user, bookmarks, isAuthenticated } = useUser()
   const [destination, setDestination] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [days, setDays] = useState("3")
-  const [interests, setInterests] = useState<string[]>(user?.preferences?.interests || [])
-  const [budget, setBudget] = useState(user?.preferences?.budget || "medium")
-  const [tripType, setTripType] = useState(user?.preferences?.tripType || "")
+  const [interests, setInterests] = useState<string[]>([])
+  const [budget, setBudget] = useState("medium")
+  const [tripType, setTripType] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [aiItinerary, setAiItinerary] = useState("")
+  const [includeWishlist, setIncludeWishlist] = useState(false)
+  const [selectedWishlistItems, setSelectedWishlistItems] = useState<string[]>([])
+  const [isInitialized, setIsInitialized] = useState(false)
 
-  const handleAIItineraryGeneration = async (e: React.FormEvent) => {
+  // Initialize form with user preferences only once
+  useEffect(() => {
+    if (user && !isInitialized) {
+      setInterests(user.preferences?.interests || [])
+      setBudget(user.preferences?.budget || "medium")
+      setTripType(user.preferences?.tripType || "")
+      setIsInitialized(true)
+    }
+  }, [user, isInitialized])
+
+  const handleAIItineraryGeneration = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!destination) return
 
@@ -34,6 +53,19 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
     setAiItinerary("")
 
     try {
+      // Prepare wishlist context for AI if user opted to include wishlist
+      let wishlistContext = ""
+      if (includeWishlist && selectedWishlistItems.length > 0) {
+        const selectedBookmarks = bookmarks.filter(bookmark => 
+          selectedWishlistItems.includes(bookmark.placeId)
+        )
+        wishlistContext = `\n\nPLEASE PRIORITIZE including these destinations from the user's wishlist:\n${
+          selectedBookmarks.map(bookmark => 
+            `- ${bookmark.title} (${bookmark.city}, ${bookmark.state})`
+          ).join('\n')
+        }\nUser specifically wants these places included in their itinerary.`
+      }
+
       const response = await fetch("/api/gemini", {
         method: "POST",
         headers: {
@@ -44,9 +76,12 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
           params: {
             destination,
             days: parseInt(days),
+            startDate,
+            endDate,
             interests,
             budget,
             tripType,
+            wishlistContext, // Add wishlist context for AI
           },
         }),
       })
@@ -63,9 +98,9 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
     } finally {
       setIsGenerating(false)
     }
-  }
+  }, [destination, days, startDate, endDate, interests, budget, tripType, includeWishlist, selectedWishlistItems, bookmarks])
 
-  const saveAIItinerary = () => {
+  const saveAIItinerary = useCallback(() => {
     if (!aiItinerary || !destination) return
 
     const newItinerary: SavedItinerary = {
@@ -78,20 +113,44 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
       budget: budget,
       tripType: tripType,
       data: aiItinerary,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      startDate,
+      endDate
     }
 
     onSaveItinerary(newItinerary)
     alert('Itinerary berhasil disimpan!')
-  }
+  }, [aiItinerary, destination, days, interests, budget, tripType, startDate, endDate, onSaveItinerary])
 
-  const toggleInterest = (interest: string) => {
+  const toggleInterest = useCallback((interest: string) => {
     setInterests(prev => 
       prev.includes(interest) 
         ? prev.filter(i => i !== interest)
         : [...prev, interest]
     )
-  }
+  }, [])
+
+  const toggleWishlistItem = useCallback((placeId: string) => {
+    setSelectedWishlistItems(prev => 
+      prev.includes(placeId)
+        ? prev.filter(id => id !== placeId)
+        : [...prev, placeId]
+    )
+  }, [])
+
+  const removeWishlistItem = useCallback((placeId: string) => {
+    setSelectedWishlistItems(prev => prev.filter(id => id !== placeId))
+  }, [])
+
+  // Memoize the relevant wishlist calculation to prevent unnecessary recalculations
+  const relevantWishlist = useMemo(() => {
+    if (!destination) return bookmarks
+    
+    return bookmarks.filter(bookmark => 
+      bookmark.city.toLowerCase().includes(destination.toLowerCase()) ||
+      bookmark.state.toLowerCase().includes(destination.toLowerCase())
+    )
+  }, [bookmarks, destination])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -115,6 +174,27 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
                   onChange={(e) => setDestination(e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ai-startDate">Tanggal Mulai</Label>
+                  <Input 
+                    id="ai-startDate" 
+                    type="date" 
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ai-endDate">Tanggal Selesai</Label>
+                  <Input 
+                    id="ai-endDate" 
+                    type="date" 
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -185,6 +265,123 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
                 </div>
               </div>
 
+              {/* Wishlist Integration Section */}
+              {isAuthenticated && bookmarks.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="include-wishlist-ai"
+                        checked={includeWishlist}
+                        onChange={(e) => {
+                          setIncludeWishlist(e.target.checked)
+                          if (!e.target.checked) {
+                            setSelectedWishlistItems([])
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="include-wishlist-ai" className="flex items-center gap-2">
+                        <BookmarkCheck className="h-4 w-4" />
+                        Prioritaskan destinasi dari wishlist
+                      </Label>
+                    </div>
+
+                    {includeWishlist && (
+                      <div className="space-y-3">
+                        <div className="text-sm text-muted-foreground">
+                          {relevantWishlist.length > 0 ? (
+                            destination ? 
+                              `AI akan memprioritaskan destinasi wishlist di ${destination}:` :
+                              "AI akan memprioritaskan destinasi dari wishlist Anda:"
+                          ) : (
+                            destination ? 
+                              `Tidak ada destinasi wishlist di ${destination}` :
+                              "Pilih kota tujuan untuk melihat wishlist yang relevan"
+                          )}
+                        </div>
+
+                        {/* Selected Wishlist Items */}
+                        {selectedWishlistItems.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-primary">
+                              Akan diprioritaskan ({selectedWishlistItems.length}):
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {selectedWishlistItems.map(placeId => {
+                                const bookmark = bookmarks.find(b => b.placeId === placeId)
+                                if (!bookmark) return null
+                                return (
+                                  <Badge 
+                                    key={placeId} 
+                                    variant="secondary" 
+                                    className="text-xs flex items-center gap-1"
+                                  >
+                                    {bookmark.title}
+                                    <button
+                                      type="button"
+                                      onClick={() => removeWishlistItem(placeId)}
+                                      className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                                    >
+                                      <X className="h-2.5 w-2.5" />
+                                    </button>
+                                  </Badge>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Wishlist Items Selection */}
+                        {relevantWishlist.length > 0 && (
+                          <div className="max-h-32 overflow-y-auto space-y-2 border rounded-lg p-2">
+                            {relevantWishlist.map((bookmark) => {
+                              const isSelected = selectedWishlistItems.includes(bookmark.placeId)
+                              return (
+                                <div 
+                                  key={bookmark.id}
+                                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all ${
+                                    isSelected
+                                      ? 'bg-primary/10 border border-primary/20'
+                                      : 'hover:bg-gray-50 border border-transparent'
+                                  }`}
+                                  onClick={() => toggleWishlistItem(bookmark.placeId)}
+                                >
+                                  <div className="relative w-8 h-8 rounded overflow-hidden flex-shrink-0">
+                                    <Image
+                                      src={bookmark.imageUrl || "/placeholder.svg"}
+                                      alt={bookmark.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium truncate">
+                                      {bookmark.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {bookmark.city}
+                                    </div>
+                                  </div>
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => {}} // Handled by parent click
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary pointer-events-none"
+                                  />
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
               <Button type="submit" className="w-full" disabled={isGenerating}>
                 {isGenerating ? (
                   <>
@@ -211,6 +408,12 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
               <CardTitle className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
                 AI Generated Itinerary
+                {selectedWishlistItems.length > 0 && (
+                  <Badge variant="outline" className="bg-primary/10">
+                    <BookmarkCheck className="h-3 w-3 mr-1" />
+                    +{selectedWishlistItems.length} Wishlist
+                  </Badge>
+                )}
               </CardTitle>
               {aiItinerary && !isGenerating && (
                 <Button onClick={saveAIItinerary} className="flex items-center gap-2">
@@ -228,6 +431,11 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
                 <p className="text-muted-foreground mb-4">
                   Isi preferensi perjalanan Anda dan biarkan AI menyusun itinerary yang sempurna
                 </p>
+                {isAuthenticated && bookmarks.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    💡 Tip: Centang "Prioritaskan destinasi dari wishlist" untuk itinerary yang lebih personal
+                  </p>
+                )}
               </div>
             ) : (
               <div className="prose max-w-none">
@@ -235,10 +443,36 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
                   <div className="text-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     <p>AI sedang menyusun itinerary terbaik untuk Anda...</p>
+                    {selectedWishlistItems.length > 0 && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        🔄 Memprioritaskan {selectedWishlistItems.length} destinasi dari wishlist Anda
+                      </p>
+                    )}
                   </div>
                 ) : (
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {aiItinerary}
+                  <div>
+                    {selectedWishlistItems.length > 0 && (
+                      <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm font-medium text-primary mb-2">
+                          <BookmarkCheck className="h-4 w-4" />
+                          Destinasi Prioritas dari Wishlist
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {selectedWishlistItems.map(placeId => {
+                            const bookmark = bookmarks.find(b => b.placeId === placeId)
+                            if (!bookmark) return null
+                            return (
+                              <Badge key={placeId} variant="outline" className="text-xs">
+                                {bookmark.title}
+                              </Badge>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {aiItinerary}
+                    </div>
                   </div>
                 )}
               </div>

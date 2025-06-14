@@ -1,63 +1,97 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Loader2, MapPin, Clock, Users, Heart, Save } from "lucide-react"
+import { Calendar, Loader2, MapPin, Clock, Users, Heart, Save, BookmarkCheck, X } from "lucide-react"
 import { LeafletRouteMap } from "@/components/leaflet-route-map"
 import { destinations } from "@/lib/data"
 import { useUser } from "@/contexts/user-context"
 import { Badge } from "@/components/ui/badge"
 import { interestOptions } from "@/lib/constants/interests"
 import type { ManualItineraryForm, SavedItinerary } from "@/types/itinerary"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Separator } from "@/components/ui/separator"
+import Image from "next/image"
 
 interface ManualItineraryTabProps {
   onSaveItinerary: (itinerary: SavedItinerary) => void
 }
 
 export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryTabProps) {
-  const { user } = useUser()
+  const { user, bookmarks, isAuthenticated } = useUser()
   const [selectedDestinations, setSelectedDestinations] = useState<any[]>([])
   const [showMap, setShowMap] = useState(false)
   const [showRoute, setShowRoute] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [includeWishlist, setIncludeWishlist] = useState(false)
+  const [selectedWishlistItems, setSelectedWishlistItems] = useState<string[]>([])
+  const [isInitialized, setIsInitialized] = useState(false)
 
   const [manualForm, setManualForm] = useState<ManualItineraryForm>({
     destination: "",
     startDate: "",
     endDate: "",
-    tripType: user?.preferences?.tripType || "",
-    interests: user?.preferences?.interests || [],
-    budget: user?.preferences?.budget || "medium",
+    tripType: "",
+    interests: [],
+    budget: "medium",
     duration: "3",
   })
 
-  const handleGenerateItinerary = (e: React.FormEvent) => {
+  // Initialize form with user preferences only once
+  useEffect(() => {
+    if (user && !isInitialized) {
+      setManualForm(prev => ({
+        ...prev,
+        tripType: user.preferences?.tripType || prev.tripType,
+        interests: user.preferences?.interests || prev.interests,
+        budget: user.preferences?.budget || prev.budget,
+      }))
+      setIsInitialized(true)
+    }
+  }, [user, isInitialized])
+
+  const handleGenerateItinerary = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     setIsGenerating(true)
     
     // Simulate generating itinerary by filtering destinations based on interests
     setTimeout(() => {
-      const filteredDestinations = destinations
+      let filteredDestinations = destinations
         .filter(dest => {
           if (manualForm.interests.length === 0) return true
           // You can add more sophisticated filtering logic based on destination categories
           return Math.random() > 0.5 // Random for demo
         })
         .sort(() => 0.5 - Math.random())
-        .slice(0, parseInt(manualForm.duration))
+
+      // Add selected wishlist destinations if user opted to include them
+      if (includeWishlist && selectedWishlistItems.length > 0) {
+        const wishlistDestinations = destinations.filter(dest => 
+          selectedWishlistItems.includes(dest.placeId)
+        )
+        
+        // Prioritize wishlist destinations by putting them first
+        filteredDestinations = [
+          ...wishlistDestinations,
+          ...filteredDestinations.filter(dest => !selectedWishlistItems.includes(dest.placeId))
+        ]
+      }
+
+      // Limit to requested duration
+      filteredDestinations = filteredDestinations.slice(0, parseInt(manualForm.duration))
 
       setSelectedDestinations(filteredDestinations)
       setShowMap(true)
       setIsGenerating(false)
     }, 2000)
-  }
+  }, [manualForm.interests, manualForm.duration, includeWishlist, selectedWishlistItems])
 
-  const saveManualItinerary = () => {
+  const saveManualItinerary = useCallback(() => {
     if (selectedDestinations.length === 0) return
 
     const newItinerary: SavedItinerary = {
@@ -77,16 +111,38 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
 
     onSaveItinerary(newItinerary)
     alert('Itinerary berhasil disimpan!')
-  }
+  }, [selectedDestinations, manualForm, onSaveItinerary])
 
-  const toggleInterest = (interest: string) => {
+  const toggleInterest = useCallback((interest: string) => {
     setManualForm(prev => ({
       ...prev,
       interests: prev.interests.includes(interest) 
         ? prev.interests.filter(i => i !== interest)
         : [...prev.interests, interest]
     }))
-  }
+  }, [])
+
+  const toggleWishlistItem = useCallback((placeId: string) => {
+    setSelectedWishlistItems(prev => 
+      prev.includes(placeId)
+        ? prev.filter(id => id !== placeId)
+        : [...prev, placeId]
+    )
+  }, [])
+
+  const removeWishlistItem = useCallback((placeId: string) => {
+    setSelectedWishlistItems(prev => prev.filter(id => id !== placeId))
+  }, [])
+
+  // Memoize the relevant wishlist calculation to prevent unnecessary recalculations
+  const relevantWishlist = useMemo(() => {
+    if (!manualForm.destination) return bookmarks
+    
+    return bookmarks.filter(bookmark => 
+      bookmark.city.toLowerCase().includes(manualForm.destination.toLowerCase()) ||
+      bookmark.state.toLowerCase().includes(manualForm.destination.toLowerCase())
+    )
+  }, [bookmarks, manualForm.destination])
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -229,6 +285,123 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                 </div>
               </div>
 
+              {/* Wishlist Integration Section */}
+              {isAuthenticated && bookmarks.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="include-wishlist"
+                        checked={includeWishlist}
+                        onChange={(e) => {
+                          setIncludeWishlist(e.target.checked)
+                          if (!e.target.checked) {
+                            setSelectedWishlistItems([])
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <Label htmlFor="include-wishlist" className="flex items-center gap-2">
+                        <BookmarkCheck className="h-4 w-4" />
+                        Sertakan destinasi dari wishlist
+                      </Label>
+                    </div>
+
+                    {includeWishlist && (
+                      <div className="space-y-3">
+                        <div className="text-sm text-muted-foreground">
+                          {relevantWishlist.length > 0 ? (
+                            manualForm.destination ? 
+                              `Pilih destinasi wishlist di ${manualForm.destination}:` :
+                              "Pilih destinasi dari wishlist Anda:"
+                          ) : (
+                            manualForm.destination ? 
+                              `Tidak ada destinasi wishlist di ${manualForm.destination}` :
+                              "Pilih kota tujuan untuk melihat wishlist yang relevan"
+                          )}
+                        </div>
+
+                        {/* Selected Wishlist Items */}
+                        {selectedWishlistItems.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-primary">
+                              Terpilih ({selectedWishlistItems.length}):
+                            </div>
+                            <div className="flex flex-wrap gap-1">
+                              {selectedWishlistItems.map(placeId => {
+                                const bookmark = bookmarks.find(b => b.placeId === placeId)
+                                if (!bookmark) return null
+                                return (
+                                  <Badge 
+                                    key={placeId} 
+                                    variant="secondary" 
+                                    className="text-xs flex items-center gap-1"
+                                  >
+                                    {bookmark.title}
+                                    <button
+                                      type="button"
+                                      onClick={() => removeWishlistItem(placeId)}
+                                      className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
+                                    >
+                                      <X className="h-2.5 w-2.5" />
+                                    </button>
+                                  </Badge>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Wishlist Items Selection */}
+                        {relevantWishlist.length > 0 && (
+                          <div className="max-h-32 overflow-y-auto space-y-2 border rounded-lg p-2">
+                            {relevantWishlist.map((bookmark) => {
+                              const isSelected = selectedWishlistItems.includes(bookmark.placeId)
+                              return (
+                                <div 
+                                  key={bookmark.id}
+                                  className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-all ${
+                                    isSelected
+                                      ? 'bg-primary/10 border border-primary/20'
+                                      : 'hover:bg-gray-50 border border-transparent'
+                                  }`}
+                                  onClick={() => toggleWishlistItem(bookmark.placeId)}
+                                >
+                                  <div className="relative w-8 h-8 rounded overflow-hidden flex-shrink-0">
+                                    <Image
+                                      src={bookmark.imageUrl || "/placeholder.svg"}
+                                      alt={bookmark.title}
+                                      fill
+                                      className="object-cover"
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium truncate">
+                                      {bookmark.title}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {bookmark.city}
+                                    </div>
+                                  </div>
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => {}} // Handled by parent click
+                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary pointer-events-none"
+                                  />
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
               <Button type="submit" className="w-full" disabled={isGenerating}>
                 {isGenerating ? (
                   <>
@@ -266,6 +439,11 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                 <p className="text-muted-foreground mb-4">
                   Isi detail perjalanan Anda dan klik "Generate Itinerary" untuk memulai
                 </p>
+                {isAuthenticated && bookmarks.length > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    💡 Tip: Centang "Sertakan destinasi dari wishlist" untuk menambahkan tempat favorit Anda
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-6">
@@ -277,6 +455,12 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                       <MapPin className="h-3 w-3" />
                       {selectedDestinations.length} Lokasi
                     </Badge>
+                    {selectedWishlistItems.length > 0 && (
+                      <Badge variant="outline" className="flex items-center gap-1 bg-primary/10">
+                        <BookmarkCheck className="h-3 w-3" />
+                        {selectedWishlistItems.filter(id => selectedDestinations.some(d => d.placeId === id)).length} dari Wishlist
+                      </Badge>
+                    )}
                     <Button
                       variant={showRoute ? "default" : "outline"}
                       size="sm"
@@ -313,17 +497,35 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       <span className="text-sm font-medium text-green-700">Start: {selectedDestinations[0].title}</span>
+                      {selectedWishlistItems.includes(selectedDestinations[0].placeId) && (
+                        <Badge variant="outline" className="text-xs bg-primary/10">
+                          <BookmarkCheck className="h-2.5 w-2.5 mr-1" />
+                          Wishlist
+                        </Badge>
+                      )}
                     </div>
                     {selectedDestinations.slice(1, -1).map((dest, index) => (
                       <div key={dest.placeId} className="flex items-center gap-2 mb-2">
                         <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                         <span className="text-sm font-medium text-blue-700">Stop {index + 1}: {dest.title}</span>
+                        {selectedWishlistItems.includes(dest.placeId) && (
+                          <Badge variant="outline" className="text-xs bg-primary/10">
+                            <BookmarkCheck className="h-2.5 w-2.5 mr-1" />
+                            Wishlist
+                          </Badge>
+                        )}
                       </div>
                     ))}
                     {selectedDestinations.length > 1 && (
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                         <span className="text-sm font-medium text-red-700">End: {selectedDestinations[selectedDestinations.length - 1].title}</span>
+                        {selectedWishlistItems.includes(selectedDestinations[selectedDestinations.length - 1].placeId) && (
+                          <Badge variant="outline" className="text-xs bg-primary/10">
+                            <BookmarkCheck className="h-2.5 w-2.5 mr-1" />
+                            Wishlist
+                          </Badge>
+                        )}
                       </div>
                     )}
                   </div>
@@ -361,6 +563,12 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                               <h4 className="font-semibold text-lg">{dest.title}</h4>
                               {index === 0 && <Badge variant="outline" className="text-xs">START</Badge>}
                               {index === selectedDestinations.length - 1 && <Badge variant="outline" className="text-xs">END</Badge>}
+                              {selectedWishlistItems.includes(dest.placeId) && (
+                                <Badge variant="outline" className="text-xs bg-primary/10">
+                                  <BookmarkCheck className="h-3 w-3 mr-1" />
+                                  Wishlist
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-muted-foreground mb-2">
                               {dest.city}, {dest.state}
@@ -401,6 +609,9 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
                           <li>• Rute telah dioptimalkan untuk efisiensi waktu dan jarak</li>
                           <li>• Siapkan waktu tambahan untuk perjalanan antar destinasi</li>
                           <li>• Cek kondisi lalu lintas sebelum berangkat</li>
+                          {selectedWishlistItems.length > 0 && (
+                            <li>• ❤️ Beberapa destinasi dipilih dari wishlist Anda untuk pengalaman yang lebih personal</li>
+                          )}
                         </ul>
                       </CardContent>
                     </Card>
