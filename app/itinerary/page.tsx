@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { MapPin, Bot, History } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,10 +13,18 @@ import HistoryItineraryTab from "@/components/itinerary/history-itinerary-tab"
 import type { SavedItinerary, ManualItineraryForm } from "@/types/itinerary"
 
 export default function ItineraryGenerator() {
-  const { user } = useUser()
+  const { user, isAuthenticated } = useUser()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<string>("manual")
   const [savedItineraries, setSavedItineraries] = useState<SavedItinerary[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
+
+  // Authentication check
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login")
+    }
+  }, [isAuthenticated, router])
 
   // Load saved itineraries from localStorage on component mount
   useEffect(() => {
@@ -52,6 +61,10 @@ export default function ItineraryGenerator() {
       setActiveTab('ai')
     }
     // Each tab component will handle its own state updates
+  }
+
+  if (!isAuthenticated) {
+    return null
   }
 
   return (

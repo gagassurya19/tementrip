@@ -1,7 +1,26 @@
+"use client"
+
+import type React from "react"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { TravelAssistant } from "@/components/travel-assistant"
+import { useUser } from "@/contexts/user-context"
 
 export default function AssistantPage() {
+  const { isAuthenticated } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login")
+    }
+  }, [isAuthenticated, router])
+
+  if (!isAuthenticated) {
+    return null
+  }
+
   return (
     <main className="min-h-screen flex flex-col">
       <Navbar />
