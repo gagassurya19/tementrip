@@ -5,7 +5,7 @@ import { destinations } from "@/lib/data"
 import { DestinationCard } from "@/components/destination-card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Filter, Grid, Map as MapIcon, MapPin, Star } from "lucide-react"
+import { Search, Filter, Grid, Map as MapIcon, MapPin, Star, ChevronLeft, ChevronRight } from "lucide-react"
 import { Suspense, useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -46,10 +46,15 @@ export default function DestinationsPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedCity, setSelectedCity] = useState("all")
   const [sortBy, setSortBy] = useState("rating")
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
   const [selectedDestination, setSelectedDestination] = useState<any | null>(null)
   const [filteredDestinations, setFilteredDestinations] = useState(destinations)
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 12
 
   // Get unique categories from destinations data
   const categories = [
@@ -61,18 +66,32 @@ export default function DestinationsPage() {
       }))
   ]
 
+  // Get unique cities from destinations data
+  const cities = [
+    { id: "all", label: "All Cities" },
+    ...Array.from(new Set(destinations.map(dest => dest.city)))
+      .filter(city => city && city.trim() !== "") // Filter out empty cities
+      .sort()
+      .map(city => ({
+        id: city.toLowerCase().replace(/\s+/g, '-'),
+        label: city
+      }))
+  ]
+
   // Initialize search term from URL params
   useEffect(() => {
     const urlSearchTerm = searchParams.get('search') || ""
     const urlCategory = searchParams.get('category') || "all"
+    const urlCity = searchParams.get('city') || "all"
     const urlSort = searchParams.get('sort') || "rating"
     
     setSearchTerm(urlSearchTerm)
     setSelectedCategory(urlCategory)
+    setSelectedCity(urlCity)
     setSortBy(urlSort)
   }, [searchParams])
 
-  // Filter and sort destinations when search term, category, or sort changes
+  // Filter and sort destinations when search term, category, city, or sort changes
   useEffect(() => {
     let filtered = destinations
 
@@ -95,6 +114,13 @@ export default function DestinationsPage() {
       )
     }
 
+    // Apply city filter
+    if (selectedCity !== "all") {
+      filtered = filtered.filter(
+        (dest) => dest.city.toLowerCase().replace(/\s+/g, '-') === selectedCity
+      )
+    }
+
     // Apply sorting
     filtered = filtered.sort((a, b) => {
       switch (sortBy) {
@@ -110,7 +136,14 @@ export default function DestinationsPage() {
     })
 
     setFilteredDestinations(filtered)
-  }, [searchTerm, selectedCategory, sortBy])
+    setCurrentPage(1) // Reset to first page when filters change
+  }, [searchTerm, selectedCategory, selectedCity, sortBy])
+
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredDestinations.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentDestinations = filteredDestinations.slice(startIndex, endIndex)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -121,6 +154,7 @@ export default function DestinationsPage() {
     const params = new URLSearchParams()
     if (searchTerm.trim()) params.set('search', searchTerm.trim())
     if (selectedCategory !== "all") params.set('category', selectedCategory)
+    if (selectedCity !== "all") params.set('city', selectedCity)
     if (sortBy !== "rating") params.set('sort', sortBy)
     
     const queryString = params.toString()
@@ -134,6 +168,21 @@ export default function DestinationsPage() {
     const params = new URLSearchParams()
     if (searchTerm.trim()) params.set('search', searchTerm.trim())
     if (category !== "all") params.set('category', category)
+    if (selectedCity !== "all") params.set('city', selectedCity)
+    if (sortBy !== "rating") params.set('sort', sortBy)
+    
+    const queryString = params.toString()
+    const url = queryString ? `/destinations?${queryString}` : '/destinations'
+    router.push(url, { scroll: false })
+  }
+
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city)
+    // Update URL immediately when city changes
+    const params = new URLSearchParams()
+    if (searchTerm.trim()) params.set('search', searchTerm.trim())
+    if (selectedCategory !== "all") params.set('category', selectedCategory)
+    if (city !== "all") params.set('city', city)
     if (sortBy !== "rating") params.set('sort', sortBy)
     
     const queryString = params.toString()
@@ -147,6 +196,7 @@ export default function DestinationsPage() {
     const params = new URLSearchParams()
     if (searchTerm.trim()) params.set('search', searchTerm.trim())
     if (selectedCategory !== "all") params.set('category', selectedCategory)
+    if (selectedCity !== "all") params.set('city', selectedCity)
     if (sort !== "rating") params.set('sort', sort)
     
     const queryString = params.toString()
@@ -157,11 +207,12 @@ export default function DestinationsPage() {
   const clearAllFilters = () => {
     setSearchTerm("")
     setSelectedCategory("all")
+    setSelectedCity("all")
     setSortBy("rating")
     router.push('/destinations', { scroll: false })
   }
 
-  const hasActiveFilters = searchTerm.trim() || selectedCategory !== "all" || sortBy !== "rating"
+  const hasActiveFilters = searchTerm.trim() || selectedCategory !== "all" || selectedCity !== "all" || sortBy !== "rating"
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -195,6 +246,20 @@ export default function DestinationsPage() {
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
                     {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedCity} onValueChange={handleCityChange}>
+              <SelectTrigger className="w-44 h-14">
+                <MapPin className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="City" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((city) => (
+                  <SelectItem key={city.id} value={city.id}>
+                    {city.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -234,12 +299,20 @@ export default function DestinationsPage() {
 
         {/* Search Results Info */}
         <div className="mb-6 flex items-center justify-between">
-          <p className="text-muted-foreground">
-            Found {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? 's' : ''}
-            {searchTerm.trim() && ` for "${searchTerm}"`}
-            {selectedCategory !== "all" && ` in ${categories.find(c => c.id === selectedCategory)?.label}`}
-            {sortBy !== "rating" && ` sorted by ${sortBy === "reviews" ? "popularity" : sortBy === "name" ? "name" : "rating"}`}
-          </p>
+          <div>
+            <p className="text-muted-foreground">
+              Found {filteredDestinations.length} destination{filteredDestinations.length !== 1 ? 's' : ''}
+              {searchTerm.trim() && ` for "${searchTerm}"`}
+              {selectedCategory !== "all" && ` in ${categories.find(c => c.id === selectedCategory)?.label}`}
+              {selectedCity !== "all" && ` in ${cities.find(c => c.id === selectedCity)?.label}`}
+              {sortBy !== "rating" && ` sorted by ${sortBy === "reviews" ? "popularity" : sortBy === "name" ? "name" : "rating"}`}
+            </p>
+            {filteredDestinations.length > itemsPerPage && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredDestinations.length)} of {filteredDestinations.length} results
+              </p>
+            )}
+          </div>
           {hasActiveFilters && (
             <Button variant="outline" size="sm" onClick={clearAllFilters}>
               Clear All Filters
@@ -250,11 +323,90 @@ export default function DestinationsPage() {
         <Suspense fallback={<DestinationsLoading />}>
           {filteredDestinations.length > 0 ? (
             viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {filteredDestinations.map((destination) => (
-                  <DestinationCard key={destination.placeId} destination={destination} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {currentDestinations.map((destination) => (
+                    <DestinationCard key={destination.placeId} destination={destination} />
+                  ))}
+                </div>
+                
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-1"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {/* Show first page and ellipsis if needed */}
+                      {currentPage > 3 && totalPages > 5 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(1)}
+                          >
+                            1
+                          </Button>
+                          <span className="px-2 text-muted-foreground">...</span>
+                        </>
+                      )}
+                      
+                      {/* Show page numbers around current page */}
+                      {(() => {
+                        const start = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+                        const end = Math.min(totalPages, Math.max(currentPage + 2, 5));
+                        
+                        return Array.from({ length: end - start + 1 }, (_, i) => {
+                          const pageNum = start + i;
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={currentPage === pageNum ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        });
+                      })()}
+                      
+                      {/* Show ellipsis and last page if needed */}
+                      {currentPage < totalPages - 2 && totalPages > 5 && (
+                        <>
+                          <span className="px-2 text-muted-foreground">...</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(totalPages)}
+                          >
+                            {totalPages}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                      className="flex items-center gap-1"
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">

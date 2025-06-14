@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "input": "data/padang.tsv",
+      "city": "Padang",
+      "output": "lib/padang-destinations.ts"
+    },
+    {
+      "input": "data/medan.tsv",
+      "city": "Medan", 
+      "output": "lib/medan-destinations.ts"
+    }
+  ]
+} 

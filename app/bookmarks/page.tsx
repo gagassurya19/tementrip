@@ -80,6 +80,19 @@ export default function BookmarksPage() {
       }
     })
 
+  // Group bookmarks by city
+  const groupedBookmarks = filteredBookmarks.reduce((groups, bookmark) => {
+    const city = bookmark.city
+    if (!groups[city]) {
+      groups[city] = []
+    }
+    groups[city].push(bookmark)
+    return groups
+  }, {} as Record<string, typeof filteredBookmarks>)
+
+  // Sort cities alphabetically
+  const sortedCities = Object.keys(groupedBookmarks).sort()
+
   const handleRemoveBookmark = (bookmarkId: string) => {
     removeBookmark(bookmarkId)
   }
@@ -239,133 +252,179 @@ export default function BookmarksPage() {
                 </Button>
               </div>
             ) : viewMode === "grid" ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredBookmarks.map((bookmark) => (
-                  <Card key={bookmark.id} className="group hover:shadow-lg transition-all duration-200">
-                    <div className="relative">
-                      <div className="relative h-48 overflow-hidden rounded-t-lg">
-                        <Image
-                          src={bookmark.imageUrl || "/placeholder.svg"}
-                          alt={bookmark.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-200"
-                        />
-                        <div className="absolute top-3 right-3">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleShare(bookmark)}>
-                                <Share2 className="h-4 w-4 mr-2" />
-                                Bagikan
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleRemoveBookmark(bookmark.id)}
-                                className="text-red-600"
-                              >
-                                <BookmarkX className="h-4 w-4 mr-2" />
-                                Hapus dari Wishlist
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+              <div className="space-y-12">
+                {sortedCities.map((city, cityIndex) => (
+                  <div key={city}>
+                    {/* City Divider */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-brand-primary/10 p-2 rounded-full">
+                          <MapPin className="h-5 w-5 text-brand-primary" />
                         </div>
-                        <div className="absolute top-3 left-3">
-                          <Badge variant="secondary" className="bg-white/80 text-black">
-                            <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
-                            Disimpan
-                          </Badge>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">{city}</h2>
+                          <p className="text-sm text-muted-foreground">
+                            {groupedBookmarks[city].length} destinasi
+                          </p>
                         </div>
                       </div>
-                      
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-lg mb-2 line-clamp-1">{bookmark.title}</h3>
-                        <div className="flex items-center text-sm text-muted-foreground mb-3">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {bookmark.city}, {bookmark.state}
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">
-                            Disimpan {new Date(bookmark.dateAdded).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'short'
-                            })}
-                          </span>
-                          <Link href={`/destinations/${bookmark.placeId}`}>
-                            <Button variant="outline" size="sm">
-                              Lihat Detail
-                            </Button>
-                          </Link>
-                        </div>
-                      </CardContent>
+                      <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
                     </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredBookmarks.map((bookmark) => (
-                  <Card key={bookmark.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex gap-4">
-                        <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={bookmark.imageUrl || "/placeholder.svg"}
-                            alt={bookmark.title}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-xl mb-1">{bookmark.title}</h3>
-                              <div className="flex items-center text-muted-foreground mb-2">
+
+                    {/* City Bookmarks Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {groupedBookmarks[city].map((bookmark) => (
+                        <Card key={bookmark.id} className="group hover:shadow-lg transition-all duration-200">
+                          <div className="relative">
+                            <div className="relative h-48 overflow-hidden rounded-t-lg">
+                              <Image
+                                src={bookmark.imageUrl || "/placeholder.svg"}
+                                alt={bookmark.title}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-200"
+                              />
+                              <div className="absolute top-3 right-3">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="secondary" size="icon" className="h-8 w-8 bg-white/80 hover:bg-white">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleShare(bookmark)}>
+                                      <Share2 className="h-4 w-4 mr-2" />
+                                      Bagikan
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => handleRemoveBookmark(bookmark.id)}
+                                      className="text-red-600"
+                                    >
+                                      <BookmarkX className="h-4 w-4 mr-2" />
+                                      Hapus dari Wishlist
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                              <div className="absolute top-3 left-3">
+                                <Badge variant="secondary" className="bg-white/80 text-black">
+                                  <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
+                                  Disimpan
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <CardContent className="p-4">
+                              <h3 className="font-semibold text-lg mb-2 line-clamp-1">{bookmark.title}</h3>
+                              <div className="flex items-center text-sm text-muted-foreground mb-3">
                                 <MapPin className="h-4 w-4 mr-1" />
                                 {bookmark.city}, {bookmark.state}
                               </div>
-                              <Badge variant="outline" className="text-xs">
-                                <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
-                                Disimpan {new Date(bookmark.dateAdded).toLocaleDateString('id-ID', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric'
-                                })}
-                              </Badge>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => handleShare(bookmark)}
-                              >
-                                <Share2 className="h-4 w-4 mr-2" />
-                                Bagikan
-                              </Button>
-                              <Link href={`/destinations/${bookmark.placeId}`}>
-                                <Button size="sm">
-                                  Lihat Detail
-                                </Button>
-                              </Link>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveBookmark(bookmark.id)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <BookmarkX className="h-4 w-4" />
-                              </Button>
-                            </div>
+                              
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-muted-foreground">
+                                  Disimpan {new Date(bookmark.dateAdded).toLocaleDateString('id-ID', {
+                                    day: 'numeric',
+                                    month: 'short'
+                                  })}
+                                </span>
+                                <Link href={`/destinations/${bookmark.placeId}`}>
+                                  <Button variant="outline" size="sm">
+                                    Lihat Detail
+                                  </Button>
+                                </Link>
+                              </div>
+                            </CardContent>
                           </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-12">
+                {sortedCities.map((city, cityIndex) => (
+                  <div key={city}>
+                    {/* City Divider */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-brand-primary/10 p-2 rounded-full">
+                          <MapPin className="h-5 w-5 text-brand-primary" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">{city}</h2>
+                          <p className="text-sm text-muted-foreground">
+                            {groupedBookmarks[city].length} destinasi
+                          </p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="flex-1 h-px bg-gradient-to-r from-gray-300 to-transparent"></div>
+                    </div>
+
+                    {/* City Bookmarks List */}
+                    <div className="space-y-4">
+                      {groupedBookmarks[city].map((bookmark) => (
+                        <Card key={bookmark.id} className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex gap-4">
+                              <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
+                                <Image
+                                  src={bookmark.imageUrl || "/placeholder.svg"}
+                                  alt={bookmark.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <h3 className="font-semibold text-xl mb-1">{bookmark.title}</h3>
+                                    <div className="flex items-center text-muted-foreground mb-2">
+                                      <MapPin className="h-4 w-4 mr-1" />
+                                      {bookmark.city}, {bookmark.state}
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      <Heart className="h-3 w-3 mr-1 fill-red-500 text-red-500" />
+                                      Disimpan {new Date(bookmark.dateAdded).toLocaleDateString('id-ID', {
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                      })}
+                                    </Badge>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleShare(bookmark)}
+                                    >
+                                      <Share2 className="h-4 w-4 mr-2" />
+                                      Bagikan
+                                    </Button>
+                                    <Link href={`/destinations/${bookmark.placeId}`}>
+                                      <Button size="sm">
+                                        Lihat Detail
+                                      </Button>
+                                    </Link>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRemoveBookmark(bookmark.id)}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <BookmarkX className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
