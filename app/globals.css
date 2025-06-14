@@ -62,10 +62,13 @@
 .leaflet-container {
   height: 100%;
   width: 100%;
+  border-radius: 0.5rem;
+  background: #f8fafc;
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .leaflet-popup-content {
@@ -73,11 +76,188 @@
   font-family: inherit;
 }
 
+.leaflet-popup-tip {
+  background: white;
+}
+
 /* Custom marker styles */
 .custom-marker-icon {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Custom Div Icon Styles */
+.custom-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-pin-marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 3px solid white;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.custom-pin-marker:hover {
+  transform: rotate(-45deg) scale(1.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.custom-pin-marker.single-marker {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  font-size: 16px;
+}
+
+.custom-pin-marker.start-marker {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 16px;
+}
+
+.custom-pin-marker.middle-marker {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  font-size: 12px;
+}
+
+.custom-pin-marker.end-marker {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 16px;
+}
+
+/* Fix the rotation for emoji/text inside markers */
+.custom-pin-marker > * {
+  transform: rotate(45deg);
+}
+
+/* Enhanced Route Map Styles */
+.leaflet-routing-container {
+  display: none !important;
+}
+
+.leaflet-routing-alternatives-container {
+  display: none !important;
+}
+
+.leaflet-control-container .leaflet-routing-container-hide {
+  display: none !important;
+}
+
+.custom-route-marker {
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.custom-route-marker:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.route-marker-start {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-color: #065f46;
+}
+
+.route-marker-middle {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-color: #1e40af;
+}
+
+.route-marker-end {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-color: #991b1b;
+}
+
+/* Route line animation */
+.leaflet-routing-line {
+  animation: dash 2s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+/* Custom popup styles for route markers */
+.leaflet-popup.route-marker-popup .leaflet-popup-content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.leaflet-popup.route-marker-popup .leaflet-popup-content {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Map loading placeholder styles */
+.map-placeholder {
+  background: linear-gradient(45deg, #f8fafc, #f1f5f9);
+  animation: pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Loading animation for map container */
+.leaflet-container.loading {
+  background: linear-gradient(45deg, #f8fafc, #e2e8f0);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Responsive map controls */
+@media (max-width: 640px) {
+  .custom-pin-marker {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+  
+  .custom-route-marker {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 12px;
+  }
+  
+  .leaflet-popup-content-wrapper {
+    max-width: 250px;
+  }
 }
 
 /* Custom marker styles for main destination and nearby places */

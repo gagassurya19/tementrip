@@ -2,6 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Leaflet CSS */
+@import 'leaflet/dist/leaflet.css';
+
+/* Leaflet Map Fixes */
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+  background: #f8f9fa;
+  font-family: inherit;
+  /* Force hardware acceleration */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.leaflet-tile-container {
+  pointer-events: auto;
+  /* Improve tile rendering */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  /* Improve tile loading */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* Prevent tile flickering */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.leaflet-tile-loaded {
+  opacity: 1 !important;
+}
+
+/* Fix for tile loading animation */
+.leaflet-tile-container img {
+  transition: opacity 0.2s;
+}
+
+/* Ensure proper z-index for controls */
+.leaflet-control-zoom {
+  z-index: 1000;
+}
+
+.leaflet-control-attribution {
+  z-index: 1000;
+}
+
+.leaflet-control-container {
+  z-index: 1000;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  line-height: 1.4;
+}
+
+/* Fix for marker icons */
+.leaflet-default-icon-path {
+  background-image: url('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png');
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
