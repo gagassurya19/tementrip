@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { History, MapPin, Clock, Bot, Trash2 } from "lucide-react"
+import { History, MapPin, Clock, Bot, Trash2, Calendar, DollarSign, Lightbulb } from "lucide-react"
 import { LeafletRouteMap } from "@/components/leaflet-route-map"
 import { Badge } from "@/components/ui/badge"
 import { interestOptions } from "@/lib/constants/interests"
@@ -25,6 +25,105 @@ export default function HistoryItineraryTab({
   const [selectedHistoryItinerary, setSelectedHistoryItinerary] = useState<SavedItinerary | null>(null)
   const [showHistoryDetail, setShowHistoryDetail] = useState(false)
   const [showRoute, setShowRoute] = useState(true)
+
+  // Parser function for AI response (same as in AI tab)
+  const parseAIItinerary = useCallback((rawItinerary: string) => {
+    if (!rawItinerary || typeof rawItinerary !== 'string') return null
+
+    const sections = rawItinerary.split('\n\n')
+    const parsedData: {
+      overallPlan?: string
+      days: Array<{
+        title: string
+        activities: Array<{
+          time: string
+          content: string
+          budget?: string
+          tips?: string
+        }>
+      }>
+    } = { days: [] }
+
+    let currentDay: any = null
+    let currentActivity: any = null
+
+    sections.forEach(section => {
+      const trimmedSection = section.trim()
+      if (!trimmedSection) return
+
+      // Check for Overall Plan
+      if (trimmedSection.startsWith('**Overall Plan:**')) {
+        parsedData.overallPlan = trimmedSection.replace('**Overall Plan:**', '').trim()
+        return
+      }
+
+      // Check for day headers
+      const dayMatch = trimmedSection.match(/\*\*Hari (\d+):\*\*/i)
+      if (dayMatch) {
+        if (currentDay) {
+          parsedData.days.push(currentDay)
+        }
+        currentDay = {
+          title: `Hari ${dayMatch[1]}`,
+          activities: []
+        }
+        return
+      }
+
+      // Check for time-based activities
+      const timeMatch = trimmedSection.match(/^(Pagi|Siang|Sore|Malam):\s*(.*)/i)
+      if (timeMatch && currentDay) {
+        if (currentActivity) {
+          currentDay.activities.push(currentActivity)
+        }
+        
+        let content = timeMatch[2]
+        let budget = ''
+        let tips = ''
+
+        // Extract budget information
+        const budgetMatches = content.match(/@budget@:\s*([^@\n]+)/g)
+        if (budgetMatches) {
+          budget = budgetMatches.join(', ').replace(/@budget@:\s*/g, '')
+          content = content.replace(/@budget@:\s*[^@\n]+/g, '').trim()
+        }
+
+        // Extract tips
+        const tipsMatch = content.match(/Tips:\s*\[(.*?)\]/i)
+        if (tipsMatch) {
+          tips = tipsMatch[1]
+          content = content.replace(/Tips:\s*\[.*?\]/i, '').trim()
+        }
+
+        currentActivity = {
+          time: timeMatch[1],
+          content: content.trim(),
+          budget: budget || undefined,
+          tips: tips || undefined
+        }
+      } else if (currentActivity && trimmedSection) {
+        // Continue previous activity content
+        currentActivity.content += '\n\n' + trimmedSection
+      }
+    })
+
+    // Add the last day and activity
+    if (currentActivity && currentDay) {
+      currentDay.activities.push(currentActivity)
+    }
+    if (currentDay) {
+      parsedData.days.push(currentDay)
+    }
+
+    return parsedData
+  }, [])
+
+  const parsedItinerary = useMemo(() => {
+    if (selectedHistoryItinerary?.type === 'ai' && selectedHistoryItinerary.data) {
+      return parseAIItinerary(selectedHistoryItinerary.data)
+    }
+    return null
+  }, [selectedHistoryItinerary, parseAIItinerary])
 
   const loadSavedItinerary = (itinerary: SavedItinerary) => {
     setSelectedHistoryItinerary(itinerary)
@@ -400,11 +499,76 @@ export default function HistoryItineraryTab({
                   // AI Itinerary Content
                   <div className="space-y-4">
                     <h3 className="text-xl font-medium">AI Generated Itinerary</h3>
-                    <div className="prose max-w-none">
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed bg-gray-50 p-4 rounded-lg">
-                        {selectedHistoryItinerary.data}
+                    
+                    {/* Parsed AI Itinerary Display */}
+                    {parsedItinerary ? (
+                      <div className="space-y-6">
+                        {/* Overall Plan */}
+                        {parsedItinerary.overallPlan && (
+                          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                            <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              Rencana Perjalanan
+                            </h3>
+                            <p className="text-blue-800 text-sm leading-relaxed">
+                              {parsedItinerary.overallPlan}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Days */}
+                        {parsedItinerary.days.map((day, dayIndex) => (
+                          <div key={dayIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4">
+                              <h3 className="font-bold text-lg flex items-center gap-2">
+                                <Calendar className="h-5 w-5" />
+                                {day.title}
+                              </h3>
+                            </div>
+                            
+                            <div className="p-4 space-y-4">
+                              {day.activities.map((activity, activityIndex) => (
+                                <div key={activityIndex} className="border-l-4 border-indigo-200 pl-4 py-2">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Clock className="h-4 w-4 text-indigo-600" />
+                                    <span className="font-semibold text-indigo-700 text-sm uppercase tracking-wide">
+                                      {activity.time}
+                                    </span>
+                                  </div>
+                                  
+                                  <div className="text-gray-700 text-sm leading-relaxed mb-3 whitespace-pre-line">
+                                    {activity.content}
+                                  </div>
+                                  
+                                  <div className="flex flex-wrap gap-2">
+                                    {activity.budget && (
+                                      <div className="inline-flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs">
+                                        <DollarSign className="h-3 w-3" />
+                                        {activity.budget}
+                                      </div>
+                                    )}
+                                    
+                                    {activity.tips && (
+                                      <div className="inline-flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full text-xs">
+                                        <Lightbulb className="h-3 w-3" />
+                                        {activity.tips}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
+                    ) : (
+                      /* Fallback to original display */
+                      <div className="prose max-w-none">
+                        <div className="whitespace-pre-wrap text-sm leading-relaxed bg-gray-50 p-4 rounded-lg">
+                          {selectedHistoryItinerary.data}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
