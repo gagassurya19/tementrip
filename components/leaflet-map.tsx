@@ -14,6 +14,8 @@ interface MapLocation {
   description?: string
   totalScore?: number
   reviewsCount?: number
+  isMainDestination?: boolean
+  distance?: number
 }
 
 interface LeafletMapProps {
@@ -146,10 +148,71 @@ function LeafletMapComponent({
         // Add markers for each location
         const markers: L.Marker[] = []
         markersRef.current = {}
+        let mainDestinationMarker: L.Marker | null = null
         
-        locations.forEach((location) => {
+        locations.forEach((location, index) => {
           if (mapRef.current && location.placeId) {
-            const marker = L.marker([location.lat, location.lng]).addTo(mapRef.current)
+            // Create different marker icons for main destination vs nearby places
+            let markerIcon
+            if (location.isMainDestination) {
+              // Red marker for main destination
+              markerIcon = L.divIcon({
+                className: 'custom-marker-main',
+                html: `
+                  <div style="
+                    background-color: #dc2626; 
+                    width: 32px; 
+                    height: 32px; 
+                    border-radius: 50% 50% 50% 0; 
+                    transform: rotate(-45deg); 
+                    border: 3px solid white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  ">
+                    <div style="
+                      color: white; 
+                      font-weight: bold; 
+                      font-size: 16px; 
+                      transform: rotate(45deg);
+                    ">📍</div>
+                  </div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+              })
+            } else {
+              // Blue marker for nearby places
+              markerIcon = L.divIcon({
+                className: 'custom-marker-nearby',
+                html: `
+                  <div style="
+                    background-color: #2563eb; 
+                    width: 24px; 
+                    height: 24px; 
+                    border-radius: 50% 50% 50% 0; 
+                    transform: rotate(-45deg); 
+                    border: 2px solid white;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  ">
+                    <div style="
+                      color: white; 
+                      font-weight: bold; 
+                      font-size: 12px; 
+                      transform: rotate(45deg);
+                    ">📍</div>
+                  </div>
+                `,
+                iconSize: [24, 24],
+                iconAnchor: [12, 24],
+              })
+            }
+
+            const marker = L.marker([location.lat, location.lng], { icon: markerIcon }).addTo(mapRef.current)
 
             // Create custom popup content with image and details
             const popupContent = `
@@ -165,20 +228,28 @@ function LeafletMapComponent({
                 <div>
                   <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #333;">
                     ${location.title || 'Unknown Location'}
+                    ${location.isMainDestination ? ' <span style="background: #dc2626; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px;">MAIN</span>' : ''}
                   </h3>
                   ${location.description ? `
                     <p style="margin: 0 0 8px 0; font-size: 13px; color: #666; line-height: 1.4;">
                       ${location.description.length > 100 ? location.description.substring(0, 100) + '...' : location.description}
                     </p>
                   ` : ''}
-                  ${location.totalScore ? `
-                    <div style="margin: 8px 0; font-size: 12px; color: #555;">
-                      <span style="font-weight: bold;">★ ${location.totalScore}</span>
-                      <span style="color: #888; margin-left: 5px;">
-                        (${location.reviewsCount?.toLocaleString() || 0} reviews)
-                      </span>
-                    </div>
-                  ` : ''}
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin: 8px 0;">
+                    ${location.totalScore ? `
+                      <div style="font-size: 12px; color: #555;">
+                        <span style="font-weight: bold;">★ ${location.totalScore}</span>
+                        <span style="color: #888; margin-left: 5px;">
+                          (${location.reviewsCount?.toLocaleString() || 0} reviews)
+                        </span>
+                      </div>
+                    ` : ''}
+                    ${location.distance ? `
+                      <div style="font-size: 11px; color: #666; background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">
+                        ${location.distance.toFixed(1)}km away
+                      </div>
+                    ` : ''}
+                  </div>
                 </div>
               </div>
             `
@@ -186,7 +257,7 @@ function LeafletMapComponent({
             marker.bindPopup(popupContent, {
               maxWidth: 320,
               minWidth: 250,
-              className: 'custom-popup'
+              className: location.isMainDestination ? 'custom-popup main-destination' : 'custom-popup nearby-place'
             })
 
             // Add click handler for marker selection
@@ -198,6 +269,11 @@ function LeafletMapComponent({
 
             markers.push(marker)
             markersRef.current[location.placeId] = marker
+
+            // Store reference to main destination marker
+            if (location.isMainDestination) {
+              mainDestinationMarker = marker
+            }
           }
         })
 
@@ -205,6 +281,20 @@ function LeafletMapComponent({
         if (locations.length > 1 && mapRef.current) {
           const group = new L.FeatureGroup(markers)
           mapRef.current.fitBounds(group.getBounds().pad(0.1))
+          
+          // Open main destination popup by default after fitting bounds
+          setTimeout(() => {
+            if (mainDestinationMarker) {
+              mainDestinationMarker.openPopup()
+            }
+          }, 300)
+        } else if (locations.length === 1 && mainDestinationMarker) {
+          // For single location, open popup after a short delay
+          setTimeout(() => {
+            if (mainDestinationMarker) {
+              mainDestinationMarker.openPopup()
+            }
+          }, 300)
         }
 
         // Force a map invalidation to ensure proper rendering
