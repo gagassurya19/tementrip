@@ -67,31 +67,33 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
         }\nUser specifically wants these places included in their itinerary.`
       }
 
+      const requestBody = {
+        action: "generateItinerary",
+        params: {
+          destination,
+          days: parseInt(days),
+          startDate,
+          endDate,
+          interests,
+          budget,
+          tripType,
+          wishlistContext, // Add wishlist context for AI
+        },
+      }
+
       const response = await fetch("/api/gemini", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          action: "generateItinerary",
-          params: {
-            destination,
-            days: parseInt(days),
-            startDate,
-            endDate,
-            interests,
-            budget,
-            tripType,
-            wishlistContext, // Add wishlist context for AI
-          },
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const data = await response.json()
 
       if (response.ok) {
         setAiItinerary(data.result)
-      } else {
+              } else {
         setAiItinerary("Maaf, tidak dapat menggenerate itinerary saat ini. Silakan coba lagi nanti.")
       }
     } catch (error) {
@@ -101,9 +103,9 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
     }
   }, [destination, days, startDate, endDate, interests, budget, tripType, includeWishlist, selectedWishlistItems, bookmarks])
 
-  const saveAIItinerary = useCallback(() => {
+  const saveAIItinerary = useCallback(async () => {
     if (!aiItinerary || !destination) return
-
+    
     const newItinerary: SavedItinerary = {
       id: Date.now().toString(),
       title: `AI Trip ke ${destination}`,
@@ -119,8 +121,11 @@ export default function AIItineraryTab({ onSaveItinerary }: AIItineraryTabProps)
       endDate
     }
 
-    onSaveItinerary(newItinerary)
-    alert('Itinerary berhasil disimpan!')
+    try {
+      await onSaveItinerary(newItinerary)
+    } catch (error) {
+      console.error('Error saving AI itinerary:', error)
+    }
   }, [aiItinerary, destination, days, interests, budget, tripType, startDate, endDate, onSaveItinerary])
 
   const toggleInterest = useCallback((interest: string) => {

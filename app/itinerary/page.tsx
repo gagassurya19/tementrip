@@ -7,51 +7,76 @@ import { Navbar } from "@/components/navbar"
 import { MapPin, Bot, History } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUser } from "@/contexts/user-context"
+import { useItinerary } from "@/hooks/use-itinerary"
 import ManualItineraryTab from "@/components/itinerary/manual-itinerary-tab"
 import AIItineraryTab from "@/components/itinerary/ai-itinerary-tab"
 import HistoryItineraryTab from "@/components/itinerary/history-itinerary-tab"
+
 import type { SavedItinerary, ManualItineraryForm } from "@/types/itinerary"
 
 export default function ItineraryGenerator() {
-  const { user, isAuthenticated } = useUser()
+  const { user, isAuthenticated, isLoading } = useUser()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<string>("manual")
-  const [savedItineraries, setSavedItineraries] = useState<SavedItinerary[]>([])
-  const [isLoaded, setIsLoaded] = useState(false)
+  
+  // Use the itinerary hook instead of localStorage
+  const {
+    itineraries: savedItineraries,
+    isLoading: itinerariesLoading,
+    error: itinerariesError,
+    createItinerary,
+    deleteItinerary,
+    refreshItineraries
+  } = useItinerary(user?.id)
 
   // Authentication check
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if loading is complete and user is not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
 
-  // Load saved itineraries from localStorage on component mount
-  useEffect(() => {
-    const saved = localStorage.getItem('savedItineraries')
-    if (saved) {
-      try {
-        setSavedItineraries(JSON.parse(saved))
-      } catch (error) {
-        console.error('Error loading saved itineraries:', error)
+  const handleSaveItinerary = async (itinerary: SavedItinerary) => {
+    if (!user?.id) {
+      alert('Anda harus login terlebih dahulu untuk menyimpan itinerary')
+      return
+    }
+
+    try {
+      const itineraryData = {
+        ...itinerary,
+        user_id: user.id
+      }
+      
+      const savedItinerary = await createItinerary(itineraryData)
+      
+      if (savedItinerary) {
+        alert('Itinerary berhasil disimpan!')
+      } else {
+        alert('Gagal menyimpan itinerary. Silakan coba lagi.')
+      }
+    } catch (error) {
+      console.error('Error saving itinerary:', error)
+      
+      if (error instanceof Error) {
+        alert(`Gagal menyimpan itinerary: ${error.message}`)
+      } else {
+        alert('Gagal menyimpan itinerary. Silakan coba lagi.')
       }
     }
-    setIsLoaded(true)
-  }, [])
-
-  // Save itineraries to localStorage whenever savedItineraries changes (only after initial load)
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem('savedItineraries', JSON.stringify(savedItineraries))
-    }
-  }, [savedItineraries, isLoaded])
-
-  const handleSaveItinerary = (itinerary: SavedItinerary) => {
-    setSavedItineraries(prev => [itinerary, ...prev])
   }
 
-  const handleDeleteItinerary = (id: string) => {
-    setSavedItineraries(prev => prev.filter(item => item.id !== id))
+  const handleDeleteItinerary = async (id: string) => {
+    try {
+      const success = await deleteItinerary(id)
+      if (!success) {
+        alert('Gagal menghapus itinerary. Silakan coba lagi.')
+      }
+    } catch (error) {
+      console.error('Error deleting itinerary:', error)
+      alert('Gagal menghapus itinerary. Silakan coba lagi.')
+    }
   }
 
   const handleEditItinerary = (itinerary: SavedItinerary) => {
@@ -61,6 +86,23 @@ export default function ItineraryGenerator() {
       setActiveTab('ai')
     }
     // Each tab component will handle its own state updates
+  }
+
+  // Show loading state while checking authentication or loading itineraries
+  if (isLoading || (isAuthenticated && itinerariesLoading)) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container py-8 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">
+              {isLoading ? 'Loading...' : 'Memuat itinerary...'}
+            </p>
+          </div>
+        </div>
+      </main>
+    )
   }
 
   if (!isAuthenticated) {
@@ -80,6 +122,23 @@ export default function ItineraryGenerator() {
             dan biarkan kami membantu menyusun rencana perjalanan yang sempurna.
           </p>
         </div>
+
+        {/* Show error message if there's an error loading itineraries */}
+        {itinerariesError && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-700">
+              Error memuat itinerary: {itinerariesError}
+            </p>
+            <button 
+              onClick={refreshItineraries}
+              className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+            >
+              Coba lagi
+            </button>
+          </div>
+        )}
+
+
 
         <Tabs defaultValue="manual" onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">

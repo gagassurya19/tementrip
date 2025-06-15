@@ -21,7 +21,9 @@ export default function BookingsPage() {
     cancelBookingWithConfirmation,
     exportBookings,
     getBookingStats,
-    isAuthenticated
+    isAuthenticated,
+    isLoading,
+    isOperationLoading
   } = useBookings()
   const router = useRouter()
 
@@ -32,10 +34,26 @@ export default function BookingsPage() {
   const stats = getBookingStats()
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if loading is complete and user is not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container py-8 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading bookings...</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   if (!isAuthenticated) {
     return null
@@ -49,7 +67,7 @@ export default function BookingsPage() {
     const cancelled = await cancelBookingWithConfirmation(bookingId)
     if (cancelled) {
       // Optionally show a success message
-      console.log("Booking cancelled successfully")
+      
     }
   }
 
@@ -105,8 +123,9 @@ export default function BookingsPage() {
                   size="sm"
                   className={`mt-2 ${isCurrentBooking ? 'text-orange-600 border-orange-500 hover:bg-orange-50' : 'text-red-500 border-red-500 hover:bg-red-50'}`}
                   onClick={() => handleCancelBooking(booking.id)}
+                  disabled={isOperationLoading}
                 >
-                  {isCurrentBooking ? 'Batalkan Perjalanan' : 'Cancel Booking'}
+                  {isOperationLoading ? 'Processing...' : (isCurrentBooking ? 'Batalkan Perjalanan' : 'Cancel Booking')}
                 </Button>
               )}
             </div>

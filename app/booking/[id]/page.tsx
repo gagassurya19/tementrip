@@ -20,7 +20,7 @@ import type { DateRange } from "react-day-picker"
 import Link from "next/link"
 
 export default function BookingPage({ params }: { params: { id: string } }) {
-  const { isAuthenticated, addBooking } = useUser()
+  const { isAuthenticated, isLoading, addBooking } = useUser()
   const router = useRouter()
   const destination = destinations.find((d) => d.placeId === params.id)
 
@@ -32,10 +32,26 @@ export default function BookingPage({ params }: { params: { id: string } }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if loading is complete and user is not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container py-8 flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </main>
+    )
+  }
 
   if (!destination) {
     return (

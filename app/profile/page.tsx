@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from "sonner"
 
 export default function Profile() {
   const { user, isAuthenticated, updateProfile, isLoading } = useUser()
@@ -47,34 +48,61 @@ export default function Profile() {
     return null
   }
 
-  const handlePersonalInfoSubmit = (e: React.FormEvent) => {
+  const handlePersonalInfoSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSaving(true)
 
-    setTimeout(() => {
-      updateProfile({
+    try {
+      await updateProfile({
         name,
         email,
         phone,
       })
+      toast.success("Personal information updated successfully")
+    } catch (error) {
+      console.error("Failed to update personal information:", error)
+      toast.error("Failed to update personal information")
+    } finally {
       setIsSaving(false)
-    }, 1000)
+    }
   }
 
-  const handlePreferencesSubmit = (e: React.FormEvent) => {
+  const handlePreferencesSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validation
+    if (!tripType) {
+      toast.error("Please select a trip type")
+      return
+    }
+    
+    if (interests.length === 0) {
+      toast.error("Please select at least one interest")
+      return
+    }
+    
+    if (!budget) {
+      toast.error("Please select a budget range")
+      return
+    }
+    
     setIsSaving(true)
 
-    setTimeout(() => {
-      updateProfile({
+    try {
+      await updateProfile({
         preferences: {
           tripType,
           interests,
           budget,
         },
       })
+      toast.success("Travel preferences updated successfully")
+    } catch (error) {
+      console.error("Failed to update travel preferences:", error)
+      toast.error("Failed to update travel preferences")
+    } finally {
       setIsSaving(false)
-    }, 1000)
+    }
   }
 
   const toggleInterest = (interest: string) => {
@@ -101,7 +129,7 @@ export default function Profile() {
           <TabsList className="mb-8">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="preferences">Travel Preferences</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
+            {/* <TabsTrigger value="security">Security</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="profile">
@@ -121,7 +149,7 @@ export default function Profile() {
                     <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                   </div>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
@@ -129,7 +157,7 @@ export default function Profile() {
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+62 123 456 7890"
                     />
-                  </div>
+                  </div> */}
 
                   <Button type="submit" disabled={isSaving}>
                     {isSaving ? (
@@ -154,8 +182,10 @@ export default function Profile() {
               <CardContent>
                 <form className="space-y-6 max-w-md" onSubmit={handlePreferencesSubmit}>
                   <div className="space-y-2">
-                    <Label htmlFor="trip-type">Preferred Trip Type</Label>
-                    <Select value={tripType} onValueChange={setTripType}>
+                    <Label htmlFor="trip-type">
+                      Preferred Trip Type <span className="text-red-500">*</span>
+                    </Label>
+                    <Select value={tripType} onValueChange={setTripType} disabled={isSaving}>
                       <SelectTrigger id="trip-type">
                         <SelectValue placeholder="Select trip type" />
                       </SelectTrigger>
@@ -169,7 +199,14 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Interests</Label>
+                    <Label>
+                      Interests <span className="text-red-500">*</span>
+                      {interests.length > 0 && (
+                        <span className="text-sm text-gray-500 ml-2">
+                          ({interests.length} selected)
+                        </span>
+                      )}
+                    </Label>
                     <div className="grid grid-cols-2 gap-4">
                       {["nature", "culture", "food", "adventure", "relaxation", "history", "shopping", "nightlife"].map(
                         (interest) => (
@@ -178,10 +215,13 @@ export default function Profile() {
                               id={`interest-${interest}`}
                               checked={interests.includes(interest)}
                               onCheckedChange={() => toggleInterest(interest)}
+                              disabled={isSaving}
                             />
                             <label
                               htmlFor={`interest-${interest}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                                isSaving ? "opacity-50" : ""
+                              }`}
                             >
                               {interest.charAt(0).toUpperCase() + interest.slice(1)}
                             </label>
@@ -192,24 +232,26 @@ export default function Profile() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="budget">Budget Range</Label>
-                    <Select value={budget} onValueChange={setBudget}>
+                    <Label htmlFor="budget">
+                      Budget Range <span className="text-red-500">*</span>
+                    </Label>
+                    <Select value={budget} onValueChange={setBudget} disabled={isSaving}>
                       <SelectTrigger id="budget">
                         <SelectValue placeholder="Select budget range" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="budget">Budget</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="luxury">Luxury</SelectItem>
+                        <SelectItem value="budget">Budget (&lt; $50/day)</SelectItem>
+                        <SelectItem value="medium">Medium ($50-150/day)</SelectItem>
+                        <SelectItem value="luxury">Luxury (&gt; $150/day)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <Button type="submit" disabled={isSaving}>
+                  <Button type="submit" disabled={isSaving} className="w-full">
                     {isSaving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
+                        Saving Preferences...
                       </>
                     ) : (
                       "Save Preferences"

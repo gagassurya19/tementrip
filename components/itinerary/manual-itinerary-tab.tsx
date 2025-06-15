@@ -91,7 +91,7 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
     }, 2000)
   }, [manualForm.interests, manualForm.duration, includeWishlist, selectedWishlistItems])
 
-  const saveManualItinerary = useCallback(() => {
+  const saveManualItinerary = useCallback(async () => {
     if (selectedDestinations.length === 0) return
 
     const newItinerary: SavedItinerary = {
@@ -109,8 +109,11 @@ export default function ManualItineraryTab({ onSaveItinerary }: ManualItineraryT
       endDate: manualForm.endDate
     }
 
-    onSaveItinerary(newItinerary)
-    alert('Itinerary berhasil disimpan!')
+    try {
+      await onSaveItinerary(newItinerary)
+    } catch (error) {
+      console.error('Error saving manual itinerary:', error)
+    }
   }, [selectedDestinations, manualForm, onSaveItinerary])
 
   const toggleInterest = useCallback((interest: string) => {

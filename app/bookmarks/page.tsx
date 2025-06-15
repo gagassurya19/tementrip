@@ -34,11 +34,13 @@ export default function BookmarksPage() {
   const [sortBy, setSortBy] = useState("dateAdded")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
+  // Authentication check
   useEffect(() => {
+    // Only redirect if loading is complete and user is not authenticated
     if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
 
   if (!isAuthenticated || !user) {
     return (

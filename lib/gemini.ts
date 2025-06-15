@@ -63,12 +63,9 @@ export async function generateText(prompt: string, systemPrompt?: string) {
   let lastError: any = null
   let attemptCount = 0
 
-  console.log(`🤖 Starting generation with ${MODEL_PRIORITY.length} available models`)
-
   for (const modelConfig of MODEL_PRIORITY) {
     attemptCount++
     try {
-      console.log(`🔄 Attempt ${attemptCount}/${MODEL_PRIORITY.length}: Trying model ${modelConfig.name} (${modelConfig.description})`)
       
       const model = genAI.getGenerativeModel({ model: modelConfig.name })
 
@@ -90,34 +87,28 @@ export async function generateText(prompt: string, systemPrompt?: string) {
         safetySettings,
       })
 
-      console.log(`✅ Successfully generated text using model: ${modelConfig.name} on attempt ${attemptCount}`)
       return result.response.text()
       
     } catch (error: any) {
-      console.error(`❌ Model ${modelConfig.name} failed on attempt ${attemptCount}:`, error.message)
       lastError = error
       
       // If it's not an overload error, don't try other models
       if (!isModelOverloadedError(error)) {
-        console.error("⚠️ Non-overload error occurred, not trying other models")
         break
       }
       
       // If this is the last model, we'll throw the error
       if (modelConfig === MODEL_PRIORITY[MODEL_PRIORITY.length - 1]) {
-        console.error("🚫 All models failed, throwing last error")
         break
       }
       
       // Wait a bit before trying the next model (progressive backoff)
       const waitTime = 1000 + (MODEL_PRIORITY.indexOf(modelConfig) * 500)
-      console.log(`⏳ Waiting ${waitTime}ms before trying next model...`)
       await new Promise(resolve => setTimeout(resolve, waitTime))
     }
   }
 
   // If we get here, all models failed
-  console.error(`🔥 All ${attemptCount} Gemini models failed, falling back to error handling`)
   
   // Check if it's a quota exceeded error
   if (lastError?.message && lastError.message.includes("quota")) {
@@ -129,12 +120,24 @@ export async function generateText(prompt: string, systemPrompt?: string) {
 }
 
 // Generate travel itinerary with fallback for quota errors
-export async function generateItinerary(destination: string, days: number, interests: string[], budget: string) {
+export async function generateItinerary(
+  destination: string, 
+  days: number, 
+  interests: string[], 
+  budget: string,
+  tripType?: string,
+  startDate?: string,
+  endDate?: string,
+  wishlistContext?: string
+) {
   try {
     const prompt = `
       Kamu adalah travel buddy yang berpengalaman dan akan membantu merencanakan liburan ${days} hari ke ${destination}. 
       Minat: ${interests.join(", ")}
       Budget: ${budget}
+      ${tripType ? `Jenis perjalanan: ${tripType}` : ''}
+      ${startDate && endDate ? `Tanggal: ${startDate} sampai ${endDate}` : ''}
+      ${wishlistContext || ''}
       
       Buat itinerary dengan struktur yang rapi tapi bahasa yang santai dan friendly:
       
@@ -170,7 +173,7 @@ export async function generateItinerary(destination: string, days: number, inter
     return await generateText(prompt)
   } catch (error: any) {
     if (error.message === "API_QUOTA_EXCEEDED") {
-      return getFallbackItinerary(destination, days, interests, budget)
+      return getFallbackItinerary(destination, days, interests, budget, tripType)
     }
     throw error
   }
@@ -274,7 +277,7 @@ export async function answerTravelQuestion(question: string) {
 
 // Fallback functions for when API quota is exceeded
 
-function getFallbackItinerary(destination: string, days: number, interests: string[], budget: string) {
+function getFallbackItinerary(destination: string, days: number, interests: string[], budget: string, tripType?: string) {
   return `
     # ${days}-Day ${destination} Itinerary
 

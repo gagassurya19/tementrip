@@ -1,5 +1,6 @@
 import { useUser } from '@/contexts/user-context'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import type { Booking } from '@/contexts/user-context'
 
 export function useBookings() {
@@ -7,9 +8,11 @@ export function useBookings() {
     bookings, 
     addBooking, 
     cancelBooking,
-    isAuthenticated 
+    isAuthenticated,
+    isLoading
   } = useUser()
   const router = useRouter()
+  const [isOperationLoading, setIsOperationLoading] = useState(false)
 
   const getUpcomingBookings = () => {
     return bookings.filter(
@@ -65,21 +68,47 @@ export function useBookings() {
     )
   }
 
-  const createBooking = (bookingData: Omit<Booking, "id" | "bookingDate">) => {
+  const createBooking = async (bookingData: Omit<Booking, "id" | "bookingDate">) => {
     if (!isAuthenticated) {
       router.push('/login')
       return false
     }
 
-    addBooking(bookingData)
-    return true
+    setIsOperationLoading(true)
+    try {
+      await addBooking(bookingData)
+
+      return true
+    } catch (error) {
+      console.error('Error creating booking:', error)
+      // Show user-friendly error message
+      if (error instanceof Error) {
+        alert(`Failed to create booking: ${error.message}`)
+      } else {
+        alert('Failed to create booking. Please try again.')
+      }
+      return false
+    } finally {
+      setIsOperationLoading(false)
+    }
   }
 
-  const cancelBookingWithConfirmation = (bookingId: string) => {
+  const cancelBookingWithConfirmation = async (bookingId: string) => {
     return new Promise<boolean>((resolve) => {
       if (window.confirm('Apakah Anda yakin ingin membatalkan booking ini?')) {
-        cancelBooking(bookingId)
-        resolve(true)
+        setIsOperationLoading(true)
+        
+        Promise.resolve(cancelBooking(bookingId))
+          .then(() => {
+            resolve(true)
+          })
+          .catch((error) => {
+            console.error('Error cancelling booking:', error)
+            resolve(false)
+          })
+          .finally(() => {
+            setIsOperationLoading(false)
+          })
       } else {
         resolve(false)
       }
@@ -134,6 +163,8 @@ export function useBookings() {
     cancelBookingWithConfirmation,
     exportBookings,
     getBookingStats,
-    isAuthenticated
+    isAuthenticated,
+    isLoading,
+    isOperationLoading
   }
 } 

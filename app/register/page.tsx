@@ -40,11 +40,10 @@ export default function Register() {
       const success = await register(name, email, password)
       if (success) {
         router.push("/")
-      } else {
-        setError("Registration failed. Please try again.")
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.")
+    } catch (err: any) {
+      console.error("Registration error:", err)
+      setError(err.message || "Registration failed. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

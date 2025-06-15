@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "generateItinerary":
-        const { destination, days, interests, budget } = params
-        result = await generateItinerary(destination, days, interests, budget)
+        const { destination, days, interests, budget, tripType, startDate, endDate, wishlistContext } = params
+        result = await generateItinerary(destination, days, interests, budget, tripType, startDate, endDate, wishlistContext)
         break
 
       case "getDestinationInfo":

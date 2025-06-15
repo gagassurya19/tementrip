@@ -8,14 +8,16 @@ import { TravelAssistant } from "@/components/travel-assistant"
 import { useUser } from "@/contexts/user-context"
 
 export default function AssistantPage() {
-  const { isAuthenticated } = useUser()
+  const { isAuthenticated, isLoading } = useUser()
   const router = useRouter()
 
+  // Authentication check
   useEffect(() => {
-    if (!isAuthenticated) {
+    // Only redirect if loading is complete and user is not authenticated
+    if (!isLoading && !isAuthenticated) {
       router.push("/login")
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isLoading, router])
 
   if (!isAuthenticated) {
     return null
